@@ -1,13 +1,22 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { Check, ArrowUpRight, Zap } from 'lucide-react'
+import { Check, ArrowUpRight, Zap, DollarSign } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
+
+const EXCHANGE_RATE = 3.7
+
+function formatCurrency(amount, currency) {
+  if (currency === 'USD') {
+    return { symbol: '$', value: Math.round(amount / EXCHANGE_RATE).toLocaleString('en-US') }
+  }
+  return { symbol: 'S/', value: amount.toLocaleString('es-PE') }
+}
 
 const plans = [
   {
     name: 'Web Esencial',
     subtitle: 'Para emprendedores',
-    price: '1,200',
+    price: 1200,
     description: 'Página web profesional para presentar tu negocio en línea.',
     features: [
       'Diseño personalizado (1 página)',
@@ -15,7 +24,7 @@ const plans = [
       'Formulario de contacto',
       'Optimización SEO básica',
       'Hosting gratis (1 año)',
-      'Dominio .com.pe incluido',
+      'Dominio incluido (.com / .com.pe)',
       'Entrega en 7 días',
     ],
     notIncluded: [
@@ -29,7 +38,7 @@ const plans = [
   {
     name: 'Web Profesional',
     subtitle: 'Para negocios en crecimiento',
-    price: '2,800',
+    price: 2800,
     description: 'Sitio web completo con múltiples secciones y funcionalidades.',
     features: [
       'Diseño premium (hasta 5 páginas)',
@@ -39,7 +48,7 @@ const plans = [
       'Integración con redes sociales',
       'Google Analytics',
       'Hosting gratis (1 año)',
-      'Dominio .com incluido',
+      'Dominio incluido (.com / .com.pe)',
       'Soporte por 3 meses',
       'Entrega en 14 días',
     ],
@@ -52,19 +61,19 @@ const plans = [
   {
     name: 'E-commerce',
     subtitle: 'Tienda online completa',
-    price: '4,500',
+    price: 4500,
     description: 'Tienda virtual completa lista para vender tus productos.',
     features: [
       'Diseño premium ilimitado',
       'Catálogo de productos',
       'Carrito de compras',
-      'Pasarela de pagos (Yape, Plin, tarjetas)',
+      'Pasarela de pagos (Stripe, PayPal, Yape, Plin, tarjetas)',
       'Gestión de inventario',
       'Panel administrativo',
       'Reportes de ventas',
       'Optimización SEO avanzada',
       'Hosting gratis (1 año)',
-      'Dominio .com incluido',
+      'Dominio incluido (.com / .com.pe)',
       'Soporte por 6 meses',
       'Entrega en 21 días',
     ],
@@ -78,17 +87,17 @@ const customServices = [
   {
     title: 'Sistemas Personalizados',
     description: 'Desarrollo de software a medida según tus requerimientos específicos.',
-    price: 'Desde S/ 5,000',
+    price: 5000,
   },
   {
     title: 'Aplicaciones Web',
     description: 'Web apps progresivas con funcionalidades avanzadas y experiencia nativa.',
-    price: 'Desde S/ 6,500',
+    price: 6500,
   },
   {
     title: 'Landing Pages',
     description: 'Páginas de conversión optimizadas para campañas publicitarias.',
-    price: 'Desde S/ 800',
+    price: 800,
   },
 ]
 
@@ -97,6 +106,7 @@ export default function Pricing() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currency, setCurrency] = useState('PEN')
 
   const handleSelectPlan = (plan) => {
     const serviceMap = {
@@ -142,9 +152,34 @@ export default function Pricing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg text-pure-gray-400 leading-relaxed"
           >
-            Precios competitivos del mercado nacional. Todos nuestros planes incluyen 
-            diseño personalizado y optimización para resultados.
+            Precios transparentes para clientes en Perú y el mundo. Todos nuestros planes incluyen 
+            diseño personalizado, hosting y dominio. Trabajamos a nivel internacional.
           </motion.p>
+
+          {/* Currency Toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-8 inline-flex items-center gap-2 p-1 border border-pure-gray-800 rounded-full bg-pure-gray-900/50"
+          >
+            <button
+              onClick={() => setCurrency('PEN')}
+              className={`px-4 py-2 text-xs font-medium rounded-full transition-all duration-300 cursor-pointer ${
+                currency === 'PEN' ? 'bg-pure-white text-pure-black' : 'text-pure-gray-400 hover:text-pure-white'
+              }`}
+            >
+              S/ (PEN)
+            </button>
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`px-4 py-2 text-xs font-medium rounded-full transition-all duration-300 cursor-pointer ${
+                currency === 'USD' ? 'bg-pure-white text-pure-black' : 'text-pure-gray-400 hover:text-pure-white'
+              }`}
+            >
+              $ (USD)
+            </button>
+          </motion.div>
         </div>
 
         {/* Pricing Cards */}
@@ -183,8 +218,8 @@ export default function Pricing() {
               <div className="mb-8">
                 <span className="text-sm text-pure-gray-500">Desde</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-pure-gray-500">S/</span>
-                  <span className="text-4xl sm:text-5xl font-bold">{plan.price}</span>
+                  <span className="text-pure-gray-500">{formatCurrency(plan.price, currency).symbol}</span>
+                  <span className="text-4xl sm:text-5xl font-bold">{formatCurrency(plan.price, currency).value}</span>
                 </div>
                 <span className="text-sm text-pure-gray-500">pago único</span>
               </div>
@@ -235,7 +270,9 @@ export default function Pricing() {
                   <div key={service.title} className="p-6 bg-pure-gray-900/30 rounded-xl">
                     <h4 className="font-semibold mb-2">{service.title}</h4>
                     <p className="text-xs text-pure-gray-500 mb-3">{service.description}</p>
-                    <span className="text-sm font-medium text-pure-white">{service.price}</span>
+                    <span className="text-sm font-medium text-pure-white">
+                      Desde {formatCurrency(service.price, currency).symbol} {formatCurrency(service.price, currency).value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -250,8 +287,7 @@ export default function Pricing() {
           transition={{ duration: 0.6, delay: 0.7 }}
           className="text-center text-xs text-pure-gray-500 mt-8"
         >
-          * Todos los precios son en soles peruanos (S/). Los precios pueden variar según requerimientos específicos.
-          Contáctanos para una cotización personalizada.
+          * Precios mostrados en {currency === 'PEN' ? 'soles peruanos (S/)' : 'dólares americanos ($)'}. Tipo de cambio aproximado: 1 USD ≈ S/ {EXCHANGE_RATE}. Los precios pueden variar según requerimientos específicos. Contáctanos para una cotización personalizada.
         </motion.p>
       </div>
       <ProjectModal
