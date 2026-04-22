@@ -4,6 +4,7 @@ import Hero from './sections/Hero'
 import Stats from './sections/Stats'
 import Services from './sections/Services'
 import Portfolio from './sections/Portfolio'
+import IndustryServices from './sections/IndustryServices'
 import Pricing from './sections/Pricing'
 import Contact from './sections/Contact'
 import Footer from './components/Footer'
@@ -22,6 +23,7 @@ function HomePage() {
         <Stats />
         <Services />
         <Portfolio />
+        <IndustryServices />
         <Pricing />
         <Contact />
       </main>

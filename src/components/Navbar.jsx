@@ -6,6 +6,7 @@ import ProjectModal from './ProjectModal'
 const navLinks = [
   { name: 'Servicios', href: '#services' },
   { name: 'Portafolio', href: '#portfolio' },
+  { name: 'Industrias', href: '#industries' },
   { name: 'Precios', href: '#pricing' },
   { name: 'Contacto', href: '#contact' },
 ]
