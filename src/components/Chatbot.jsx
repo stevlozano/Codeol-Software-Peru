@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react'
+import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles, Phone } from 'lucide-react'
 
 const GEMINI_API_KEY = 'AIzaSyDJY2myyyQLlfFNr-yzW5Gf1T9B02_J6j8'
 
@@ -161,6 +161,20 @@ export default function Chatbot() {
 
   return (
     <>
+      {/* WhatsApp Button */}
+      <motion.a
+        href="https://wa.me/51926974985?text=Hola%20Codeol%2C%20quiero%20cotizar%20un%20proyecto"
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1.5, type: 'spring', duration: 0.6 }}
+        className="fixed bottom-[5.5rem] right-6 z-40 w-14 h-14 bg-pure-black border border-pure-white text-pure-white rounded-full flex items-center justify-center shadow-2xl hover:shadow-white/20 hover:bg-pure-gray-900 transition-all duration-300 cursor-pointer"
+      >
+        <Phone size={22} />
+        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-pure-black" />
+      </motion.a>
+
       {/* Chat Button */}
       <motion.button
         onClick={() => setIsOpen(true)}
