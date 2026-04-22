@@ -13,6 +13,8 @@ import EcommerceDemo from './pages/EcommerceDemo'
 import ERPDemo from './pages/ERPDemo'
 import FintechLandingDemo from './pages/FintechLandingDemo'
 import RealEstateDemo from './pages/RealEstateDemo'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
 
 function HomePage() {
   return (
@@ -42,6 +44,8 @@ function App() {
         <Route path="/demo/sistema-erp" element={<ERPDemo />} />
         <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />
         <Route path="/demo/portal-inmobiliario" element={<RealEstateDemo />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
       </Routes>
     </Router>
   )

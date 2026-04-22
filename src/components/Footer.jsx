@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { ArrowUpRight, Mail, Phone, MapPin } from 'lucide-react'
 
 const footerLinks = {
@@ -14,8 +15,8 @@ const footerLinks = {
     { name: 'Contacto', href: '#contact' },
   ],
   legal: [
-    { name: 'Política de Privacidad', href: '#' },
-    { name: 'Términos de Servicio', href: '#' },
+    { name: 'Política de Privacidad', href: '/privacy' },
+    { name: 'Términos de Servicio', href: '/terms' },
   ],
 }
 
@@ -100,9 +101,9 @@ export default function Footer() {
                   <ul className="space-y-3 ">
                     {footerLinks.legal.map((link) => (
                       <li key={link.name}>
-                        <a href={link.href} className="text-sm text-pure-gray-400 hover:text-pure-white transition-colors">
+                        <Link to={link.href} className="text-sm text-pure-gray-400 hover:text-pure-white transition-colors">
                           {link.name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
