@@ -620,7 +620,7 @@ export default function RealEstateDemo() {
               className="absolute inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-full lg:max-w-4xl lg:max-h-[90vh] bg-pure-gray-900 lg:rounded-2xl overflow-hidden">
+              <div className="w-full lg:max-w-4xl h-[85vh] lg:h-auto lg:max-h-[90vh] bg-pure-gray-900 lg:rounded-2xl overflow-hidden flex flex-col lg:block">
                 {/* Close Button */}
                 <button
                   onClick={() => setSelectedProperty(null)}
@@ -629,7 +629,7 @@ export default function RealEstateDemo() {
                   <X size={20} />
                 </button>
 
-                <div className="lg:flex lg:h-[90vh]">
+                <div className="flex flex-col lg:flex-row h-full lg:h-[90vh] overflow-y-auto lg:overflow-visible">
                   {/* Image Gallery */}
                   <div className="lg:w-1/2 relative">
                     <div className={`aspect-square lg:aspect-auto lg:h-full ${selectedProperty.images[activeImage]}`}>

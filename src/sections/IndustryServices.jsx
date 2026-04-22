@@ -1,6 +1,7 @@
 import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Pill, UtensilsCrossed, Stethoscope, Building2, ShoppingBag, Car, GraduationCap, ShieldCheck, Globe, Code, Smartphone, Layout, Briefcase, Plane, ArrowUpRight } from 'lucide-react'
+import ProjectModal from '../components/ProjectModal'
 
 const national = [
   { title: 'Farmacias & Boticas', icon: Pill, desc: 'Sistema con control de lotes, vencimientos, receta digital, delivery y reportes para DIGEMID.', features: ['Control de lotes y vencimientos','Receta digital','Delivery','Reportes regulatorios'], service: 'Sistema Farmacia', price: 'Desde S/ 6,500' },
@@ -22,7 +23,7 @@ const international = [
   { title: 'Enterprise ERP/CRM', icon: Briefcase, desc: 'Sistemas custom con integraciones Salesforce, HubSpot, SAP, BI reports.', features: ['ERP/CRM','Integraciones','Multi-user','BI reports'], service: 'Sistema ERP/CRM', price: 'From $5,000' },
 ]
 
-function IndustryCard({ item, index, isInView }) {
+function IndustryCard({ item, index, isInView, onCotizar }) {
   const Icon = item.icon
   return (
     <motion.div
@@ -44,7 +45,10 @@ function IndustryCard({ item, index, isInView }) {
           <span key={f} className="text-xs text-pure-gray-500 bg-pure-gray-800/40 px-2 py-1 rounded-md">{f}</span>
         ))}
       </div>
-      <button className="inline-flex items-center gap-1 text-xs text-pure-white hover:text-pure-gray-300 transition-colors">
+      <button
+        onClick={() => onCotizar(item)}
+        className="inline-flex items-center gap-1 text-xs text-pure-white hover:text-pure-gray-300 transition-colors cursor-pointer"
+      >
         Cotizar ahora <ArrowUpRight size={12} />
       </button>
     </motion.div>
@@ -54,6 +58,20 @@ function IndustryCard({ item, index, isInView }) {
 export default function IndustryServices() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-80px' })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedService, setSelectedService] = useState(null)
+
+  const handleCotizar = (item) => {
+    setSelectedService({
+      name: item.title,
+      subtitle: item.service,
+      price: item.price,
+      features: item.features,
+      service: item.service,
+      description: item.desc
+    })
+    setIsModalOpen(true)
+  }
 
   return (
     <section id="industries" ref={ref} className="py-24 lg:py-32 bg-pure-black">
@@ -70,25 +88,34 @@ export default function IndustryServices() {
           <span className="w-8 h-px bg-pure-gray-700" /> Rubros Nacionales — Perú & Latinoamérica
         </motion.h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
-          {national.map((item, i) => <IndustryCard key={item.title} item={item} index={i} isInView={isInView} />)}
+          {national.map((item, i) => <IndustryCard key={item.title} item={item} index={i} isInView={isInView} onCotizar={handleCotizar} />)}
         </div>
 
         <motion.h3 initial={{ opacity: 0 }} animate={isInView ? { opacity: 1 } : {}} transition={{ delay: 0.4 }} className="text-sm uppercase tracking-widest text-pure-gray-500 mb-6 flex items-center gap-3">
           <span className="w-8 h-px bg-pure-gray-700" /> Servicios Internacionales — Global
         </motion.h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {international.map((item, i) => <IndustryCard key={item.title} item={item} index={i + 8} isInView={isInView} />)}
+          {international.map((item, i) => <IndustryCard key={item.title} item={item} index={i + 8} isInView={isInView} onCotizar={handleCotizar} />)}
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.6 }} className="text-center mt-16 p-8 border border-pure-gray-800 rounded-2xl bg-pure-gray-900/20">
           <p className="text-pure-gray-400 text-sm max-w-2xl mx-auto">
             ¿No encuentras tu rubro? Desarrollamos software para cualquier sector. Contáctanos y te damos una solución personalizada.
           </p>
-          <a href="#contact" className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-pure-white text-pure-black text-sm font-medium rounded-full hover:bg-pure-gray-200 transition-colors">
+          <button
+            onClick={() => handleCotizar({ title: 'Proyecto personalizado', service: 'Otro', desc: 'Cotización personalizada para cualquier rubro', features: [], price: 'Cotización' })}
+            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-pure-white text-pure-black text-sm font-medium rounded-full hover:bg-pure-gray-200 transition-colors cursor-pointer"
+          >
             Cotizar proyecto personalizado <ArrowUpRight size={14} />
-          </a>
+          </button>
         </motion.div>
       </div>
+
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        plan={selectedService || { name: 'Proyecto personalizado', subtitle: 'Cuéntanos tu idea', price: 'Cotización personalizada', features: ['Diseño a medida', 'Desarrollo profesional', 'Soporte dedicado'], service: 'Otro' }}
+      />
     </section>
   )
 }
