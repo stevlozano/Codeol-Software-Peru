@@ -1,84 +1,76 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { Check, ArrowUpRight, Zap, DollarSign } from 'lucide-react'
+import { Check, ArrowUpRight, Zap, TrendingUp, Users, Globe } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
-
-const EXCHANGE_RATE = 3.7
-
-function formatCurrency(amount, currency) {
-  if (currency === 'USD') {
-    return { symbol: '$', value: Math.round(amount / EXCHANGE_RATE).toLocaleString('en-US') }
-  }
-  return { symbol: 'S/', value: amount.toLocaleString('es-PE') }
-}
 
 const plans = [
   {
     name: 'Web Esencial',
     subtitle: 'Para emprendedores',
-    price: 1200,
-    description: 'Página web profesional para presentar tu negocio en línea.',
+    price: 'Cotizar',
+    description: 'Tu primera presencia digital profesional que genera confianza desde el primer día.',
     features: [
-      'Diseño personalizado (1 página)',
-      '100% Responsive',
-      'Formulario de contacto',
-      'Optimización SEO básica',
-      'Hosting gratis (1 año)',
-      'Dominio incluido (.com / .com.pe)',
+      'Diseño personalizado que conecta con tu marca',
+      '100% Responsive en todos los dispositivos',
+      'Formulario de contacto que convierte visitantes',
+      'Optimización SEO para aparecer en Google',
+      'Hosting y dominio incluidos por 1 año',
       'Entrega en 7 días',
     ],
-    notIncluded: [
-      'Panel administrativo',
-      'E-commerce',
-      'Soporte prioritario',
+    results: [
+      'Mayor visibilidad online',
+      'Clientes te encuentran fácilmente',
+      'Imagen profesional desde el inicio',
     ],
-    cta: 'Comenzar proyecto',
+    cta: 'Cotizar ahora',
     popular: false,
   },
   {
     name: 'Web Profesional',
     subtitle: 'Para negocios en crecimiento',
-    price: 2800,
-    description: 'Sitio web completo con múltiples secciones y funcionalidades.',
+    price: 'Cotizar',
+    description: 'Sitio web completo que posiciona tu marca y genera leads cualificados.',
     features: [
-      'Diseño premium (hasta 5 páginas)',
-      '100% Responsive avanzado',
-      'Blog integrado',
-      'Optimización SEO completa',
+      'Diseño premium hasta 5 páginas',
+      'Blog para generar contenido de valor',
+      'SEO completo para posicionamiento orgánico',
       'Integración con redes sociales',
-      'Google Analytics',
-      'Hosting gratis (1 año)',
-      'Dominio incluido (.com / .com.pe)',
-      'Soporte por 3 meses',
+      'Google Analytics para medir resultados',
+      'Hosting y dominio incluidos por 1 año',
+      'Soporte dedicado por 3 meses',
       'Entrega en 14 días',
     ],
-    notIncluded: [
-      'E-commerce',
+    results: [
+      'Posicionamiento en Google',
+      'Aumento de leads cualificados',
+      'Autoridad en tu industria',
     ],
-    cta: 'Comenzar proyecto',
+    cta: 'Cotizar ahora',
     popular: true,
   },
   {
     name: 'E-commerce',
     subtitle: 'Tienda online completa',
-    price: 4500,
-    description: 'Tienda virtual completa lista para vender tus productos.',
+    price: 'Cotizar',
+    description: 'Tienda virtual optimizada para maximizar tus ventas 24/7.',
     features: [
-      'Diseño premium ilimitado',
-      'Catálogo de productos',
-      'Carrito de compras',
-      'Pasarela de pagos (Stripe, PayPal, Yape, Plin, tarjetas)',
-      'Gestión de inventario',
-      'Panel administrativo',
-      'Reportes de ventas',
-      'Optimización SEO avanzada',
-      'Hosting gratis (1 año)',
-      'Dominio incluido (.com / .com.pe)',
-      'Soporte por 6 meses',
+      'Diseño premium para conversión',
+      'Catálogo de productos ilimitado',
+      'Pasarela de pagos (Yape, Plin, tarjetas)',
+      'Gestión de inventario automatizada',
+      'Panel administrativo intuitivo',
+      'Reportes de ventas en tiempo real',
+      'SEO avanzado para productos',
+      'Hosting y dominio incluidos por 1 año',
+      'Soporte dedicado por 6 meses',
       'Entrega en 21 días',
     ],
-    notIncluded: [],
-    cta: 'Comenzar proyecto',
+    results: [
+      'Ventas automatizadas 24/7',
+      'Mayor ticket promedio',
+      'Retención de clientes',
+    ],
+    cta: 'Cotizar ahora',
     popular: false,
   },
 ]
@@ -86,18 +78,18 @@ const plans = [
 const customServices = [
   {
     title: 'Sistemas Personalizados',
-    description: 'Desarrollo de software a medida según tus requerimientos específicos.',
-    price: 5000,
+    description: 'Software a medida que optimiza tus procesos internos.',
+    icon: <TrendingUp size={20} />,
   },
   {
     title: 'Aplicaciones Web',
-    description: 'Web apps progresivas con funcionalidades avanzadas y experiencia nativa.',
-    price: 6500,
+    description: 'Web apps con funcionalidades avanzadas y experiencia nativa.',
+    icon: <Globe size={20} />,
   },
   {
     title: 'Landing Pages',
-    description: 'Páginas de conversión optimizadas para campañas publicitarias.',
-    price: 800,
+    description: 'Páginas de alta conversión para campañas publicitarias.',
+    icon: <Users size={20} />,
   },
 ]
 
@@ -106,7 +98,6 @@ export default function Pricing() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currency, setCurrency] = useState('PEN')
 
   const handleSelectPlan = (plan) => {
     const serviceMap = {
@@ -136,7 +127,7 @@ export default function Pricing() {
             transition={{ duration: 0.6 }}
             className="text-xs uppercase tracking-widest text-pure-gray-500 mb-4 block"
           >
-            Precios transparentes
+            Soluciones que impulsan tu negocio
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
@@ -144,7 +135,7 @@ export default function Pricing() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6"
           >
-            Inversión acorde a tu <span className="text-pure-gray-400">presupuesto</span>
+            Resultados que <span className="text-pure-gray-400">transforman</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -152,34 +143,9 @@ export default function Pricing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg text-pure-gray-400 leading-relaxed"
           >
-            Precios transparentes para clientes en Perú y el mundo. Todos nuestros planes incluyen 
-            diseño personalizado, hosting y dominio. Trabajamos a nivel internacional.
+            Cada solución está diseñada para generar valor real: más visibilidad, más clientes, más ventas.
+            Cotizamos según tus necesidades específicas.
           </motion.p>
-
-          {/* Currency Toggle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-8 inline-flex items-center gap-2 p-1 border border-pure-gray-800 rounded-full bg-pure-gray-900/50"
-          >
-            <button
-              onClick={() => setCurrency('PEN')}
-              className={`px-4 py-2 text-xs font-medium rounded-full transition-all duration-300 cursor-pointer ${
-                currency === 'PEN' ? 'bg-pure-white text-pure-black' : 'text-pure-gray-400 hover:text-pure-white'
-              }`}
-            >
-              S/ (PEN)
-            </button>
-            <button
-              onClick={() => setCurrency('USD')}
-              className={`px-4 py-2 text-xs font-medium rounded-full transition-all duration-300 cursor-pointer ${
-                currency === 'USD' ? 'bg-pure-white text-pure-black' : 'text-pure-gray-400 hover:text-pure-white'
-              }`}
-            >
-              $ (USD)
-            </button>
-          </motion.div>
         </div>
 
         {/* Pricing Cards */}
@@ -214,14 +180,23 @@ export default function Pricing() {
                 <p className="text-sm text-pure-gray-400 mt-2">{plan.description}</p>
               </div>
 
-              {/* Price */}
+              {/* Price - CTA focused */}
               <div className="mb-8">
-                <span className="text-sm text-pure-gray-500">Desde</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-pure-gray-500">{formatCurrency(plan.price, currency).symbol}</span>
-                  <span className="text-4xl sm:text-5xl font-bold">{formatCurrency(plan.price, currency).value}</span>
-                </div>
-                <span className="text-sm text-pure-gray-500">pago único</span>
+                <span className="text-2xl sm:text-3xl font-bold text-pure-white">{plan.price}</span>
+                <p className="text-sm text-pure-gray-500 mt-1">Personalizado según tu proyecto</p>
+              </div>
+
+              {/* Results */}
+              <div className="mb-6 p-4 bg-pure-gray-900/50 rounded-xl">
+                <p className="text-xs text-pure-gray-500 uppercase tracking-wider mb-3">Resultados que obtienes</p>
+                <ul className="space-y-2">
+                  {plan.results.map((result) => (
+                    <li key={result} className="flex items-start gap-2 text-sm text-pure-gray-300">
+                      <TrendingUp size={14} className="text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>{result}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               {/* Features */}
@@ -259,20 +234,26 @@ export default function Pricing() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-4">
-              <h3 className="text-2xl font-bold mb-2">Servicios personalizados</h3>
+              <h3 className="text-2xl font-bold mb-2">¿Necesitas algo más específico?</h3>
               <p className="text-pure-gray-400 text-sm">
-                ¿Necesitas algo más específico? Cotizamos según tus requerimientos.
+                Desarrollamos soluciones a medida según tus requerimientos únicos.
               </p>
             </div>
             <div className="lg:col-span-8">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {customServices.map((service) => (
                   <div key={service.title} className="p-6 bg-pure-gray-900/30 rounded-xl">
-                    <h4 className="font-semibold mb-2">{service.title}</h4>
-                    <p className="text-xs text-pure-gray-500 mb-3">{service.description}</p>
-                    <span className="text-sm font-medium text-pure-white">
-                      Desde {formatCurrency(service.price, currency).symbol} {formatCurrency(service.price, currency).value}
-                    </span>
+                    <div className="flex items-center gap-2 mb-3 text-pure-white">
+                      {service.icon}
+                      <h4 className="font-semibold">{service.title}</h4>
+                    </div>
+                    <p className="text-xs text-pure-gray-500 mb-4">{service.description}</p>
+                    <button
+                      onClick={() => handleSelectPlan({ name: service.title, description: service.description, service: 'Otro' })}
+                      className="text-sm text-pure-white hover:text-pure-gray-300 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      Cotizar <ArrowUpRight size={12} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -287,7 +268,7 @@ export default function Pricing() {
           transition={{ duration: 0.6, delay: 0.7 }}
           className="text-center text-xs text-pure-gray-500 mt-8"
         >
-          * Precios mostrados en {currency === 'PEN' ? 'soles peruanos (S/)' : 'dólares americanos ($)'}. Tipo de cambio aproximado: 1 USD ≈ S/ {EXCHANGE_RATE}. Los precios pueden variar según requerimientos específicos. Contáctanos para una cotización personalizada.
+          * Cada proyecto es único. La cotización se personaliza según tus requerimientos específicos, alcance y plazos. Contáctanos para una evaluación detallada.
         </motion.p>
       </div>
       <ProjectModal
