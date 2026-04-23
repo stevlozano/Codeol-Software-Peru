@@ -55,59 +55,169 @@ const deleteOrder = (orderId) => {
   localStorage.setItem('codeol-orders', JSON.stringify(filtered))
 }
 
-// Generar PDF
+// Generar PDF con estilo minimalista
 const generateOrderPDF = (order) => {
   const doc = new jsPDF()
   
-  // Encabezado
-  doc.setFontSize(20)
-  doc.text('Codeol Software Perú', 20, 20)
+  // Colores - estilo minimalista negro/blanco/gris
+  const black = [0, 0, 0]
+  const darkGray = [30, 30, 30]
+  const mediumGray = [100, 100, 100]
+  const lightGray = [230, 230, 230]
   
+  // Fondo blanco
+  doc.setFillColor(255, 255, 255)
+  doc.rect(0, 0, 210, 297, 'F')
+  
+  // Header con fondo negro
+  doc.setFillColor(...darkGray)
+  doc.rect(0, 0, 210, 45, 'F')
+  
+  // Logo/Nombre empresa en blanco
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(24)
+  doc.setFont('helvetica', 'bold')
+  doc.text('CODEOL', 20, 25)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.text('SOFTWARE PERÚ', 20, 32)
+  
+  // Info de orden en header (derecha)
+  doc.setFontSize(9)
+  doc.text(`ORDEN #${order.id.slice(-6)}`, 150, 20)
+  doc.text(new Date(order.createdAt).toLocaleDateString('es-PE'), 150, 26)
+  
+  // Estado badge
+  const statusColor = order.status === 'approved' ? [34, 197, 94] : 
+                      order.status === 'rejected' ? [239, 68, 68] : [234, 179, 8]
+  doc.setFillColor(...statusColor)
+  doc.roundedRect(150, 30, 40, 8, 2, 2, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(8)
+  const statusText = order.status === 'approved' ? 'APROBADO' : 
+                     order.status === 'rejected' ? 'RECHAZADO' : 'PENDIENTE'
+  doc.text(statusText, 170, 35, { align: 'center' })
+  
+  // Sección Cliente
+  doc.setTextColor(...black)
   doc.setFontSize(12)
-  doc.text('Orden de Servicio', 20, 30)
-  doc.text(`Fecha: ${new Date(order.createdAt).toLocaleString()}`, 20, 38)
-  doc.text(`Estado: ${order.status === 'pending' ? 'Pendiente' : order.status === 'approved' ? 'Aprobado' : 'Rechazado'}`, 20, 46)
+  doc.setFont('helvetica', 'bold')
+  doc.text('INFORMACIÓN DEL CLIENTE', 20, 65)
   
   // Línea separadora
-  doc.line(20, 52, 190, 52)
+  doc.setDrawColor(...lightGray)
+  doc.setLineWidth(0.5)
+  doc.line(20, 68, 190, 68)
   
-  // Información del cliente
-  doc.setFontSize(14)
-  doc.text('Información del Cliente', 20, 62)
+  doc.setTextColor(...mediumGray)
   doc.setFontSize(10)
-  doc.text(`Nombre: ${order.customer?.nombre || 'N/A'}`, 20, 70)
-  doc.text(`Email: ${order.customer?.email || 'N/A'}`, 20, 76)
-  doc.text(`Teléfono: ${order.customer?.telefono || 'N/A'}`, 20, 82)
-  doc.text(`Empresa: ${order.customer?.empresa || 'N/A'}`, 20, 88)
-  doc.text(`RUC: ${order.customer?.ruc || 'N/A'}`, 20, 94)
-  doc.text(`Dirección: ${order.customer?.direccion || 'N/A'}`, 20, 100)
+  doc.setFont('helvetica', 'normal')
   
-  // Servicios
-  doc.setFontSize(14)
-  doc.text('Servicios Solicitados', 20, 115)
+  const clienteData = [
+    ['Nombre:', order.customer?.nombre || 'N/A'],
+    ['Email:', order.customer?.email || 'N/A'],
+    ['Teléfono:', order.customer?.telefono || 'N/A'],
+    ['Empresa:', order.customer?.empresa || 'N/A'],
+    ['Dirección:', order.customer?.direccion || 'N/A'],
+  ]
   
-  let y = 125
+  let y = 78
+  clienteData.forEach(([label, value]) => {
+    doc.setTextColor(...mediumGray)
+    doc.setFontSize(9)
+    doc.text(label, 20, y)
+    doc.setTextColor(...black)
+    doc.setFont('helvetica', 'bold')
+    doc.text(value, 55, y)
+    doc.setFont('helvetica', 'normal')
+    y += 8
+  })
+  
+  // Sección Servicios
+  y += 10
+  doc.setTextColor(...black)
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.text('SERVICIOS CONTRATADOS', 20, y)
+  doc.setDrawColor(...lightGray)
+  doc.line(20, y + 3, 190, y + 3)
+  
+  // Tabla de servicios
+  y += 15
+  doc.setFillColor(250, 250, 250)
+  doc.rect(20, y - 6, 170, 10, 'F')
+  doc.setTextColor(...mediumGray)
+  doc.setFontSize(9)
+  doc.text('Ítem', 25, y)
+  doc.text('Cantidad', 120, y)
+  doc.text('Precio', 160, y)
+  
+  y += 12
+  doc.setTextColor(...black)
   order.items?.forEach((item, index) => {
+    if (index % 2 === 0) {
+      doc.setFillColor(250, 250, 250)
+      doc.rect(20, y - 5, 170, 8, 'F')
+    }
     doc.setFontSize(10)
-    doc.text(`${index + 1}. ${item.name}`, 20, y)
-    doc.text(`Cantidad: ${item.quantity}`, 120, y)
-    doc.text(`Precio: S/ ${item.customPrice || 'Cotizar'}`, 160, y)
+    doc.text(`${index + 1}. ${item.name}`, 25, y)
+    doc.text(`${item.quantity}`, 125, y)
+    doc.text(`S/ ${item.customPrice || 'Cotizar'}`, 165, y)
     y += 10
   })
   
-  // Totales
-  y += 10
-  doc.line(20, y, 190, y)
-  y += 10
-  doc.setFontSize(12)
-  doc.text(`Subtotal: S/ ${order.totalPrice || 0}`, 130, y)
-  doc.text(`IGV (18%): S/ ${((order.totalPrice || 0) * 0.18).toFixed(2)}`, 130, y + 7)
-  doc.text(`Total: S/ ${((order.totalPrice || 0) * 1.18).toFixed(2)}`, 130, y + 14)
+  // Sección Totales
+  y += 15
+  doc.setDrawColor(...lightGray)
+  doc.line(20, y - 5, 190, y - 5)
   
-  // Pie de página
+  const subtotal = order.totalPrice || 0
+  const igv = subtotal * 0.18
+  const total = subtotal + igv
+  
+  // Totales alineados a la derecha
+  doc.setTextColor(...mediumGray)
+  doc.setFontSize(10)
+  doc.text('Subtotal:', 130, y)
+  doc.setTextColor(...black)
+  doc.setFont('helvetica', 'bold')
+  doc.text(`S/ ${subtotal.toFixed(2)}`, 185, y, { align: 'right' })
+  
+  y += 8
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...mediumGray)
+  doc.text('IGV (18%):', 130, y)
+  doc.setTextColor(...black)
+  doc.text(`S/ ${igv.toFixed(2)}`, 185, y, { align: 'right' })
+  
+  y += 12
+  // Total destacado con fondo
+  doc.setFillColor(...darkGray)
+  doc.roundedRect(125, y - 6, 65, 12, 3, 3, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'bold')
+  doc.text(`TOTAL: S/ ${total.toFixed(2)}`, 157, y + 2, { align: 'center' })
+  
+  // Método de pago
+  y += 20
+  doc.setTextColor(...mediumGray)
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.text('Método de pago:', 20, y)
+  doc.setTextColor(...black)
+  doc.setFont('helvetica', 'bold')
+  doc.text(order.paymentMethod?.toUpperCase() || 'N/A', 55, y)
+  
+  // Footer minimalista
+  doc.setFillColor(...darkGray)
+  doc.rect(0, 280, 210, 17, 'F')
+  doc.setTextColor(150, 150, 150)
   doc.setFontSize(8)
-  doc.text('Gracias por confiar en Codeol Software Perú', 20, 280)
-  doc.text('Contacto: 916 895 252 | codeolsoftware@gmail.com', 20, 285)
+  doc.setFont('helvetica', 'normal')
+  doc.text('codeolsoftware@gmail.com  |  +51 916 895 252  |  codeol.vercel.app', 105, 290, { align: 'center' })
+  doc.setFontSize(7)
+  doc.text('Gracias por confiar en nosotros', 105, 294, { align: 'center' })
   
   return doc
 }
