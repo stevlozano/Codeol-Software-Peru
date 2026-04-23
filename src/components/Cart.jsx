@@ -38,7 +38,7 @@ export default function Cart() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCart}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 pointer-events-auto"
           />
 
           {/* Cart Panel */}
@@ -47,7 +47,7 @@ export default function Cart() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-pure-black border-l border-pure-gray-800 z-[60] flex flex-col"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-pure-black border-l border-pure-gray-800 z-[60] flex flex-col pointer-events-auto"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-pure-gray-800">
@@ -67,7 +67,7 @@ export default function Cart() {
             </div>
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 relative" style={{ minHeight: '200px' }}>
               {cart.length === 0 ? (
                 <div className="text-center py-12">
                   <ShoppingBag size={48} className="mx-auto text-pure-gray-600 mb-4" />
@@ -94,8 +94,8 @@ export default function Cart() {
                       className="flex gap-4 p-4 bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl"
                     >
                       {/* Icon */}
-                      <div className="w-16 h-16 bg-pure-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        {item.icon && <item.icon size={28} className="text-pure-white" />}
+                      <div className="w-12 h-12 bg-pure-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <ShoppingBag size={20} className="text-pure-gray-400" />
                       </div>
 
                       {/* Details */}
@@ -109,12 +109,15 @@ export default function Cart() {
                           <input
                             type="number"
                             min={MIN_PRICE}
+                            step="10"
                             value={item.customPrice || ''}
-                            onChange={(e) => updateItemPrice(item.id, e.target.value)}
-                            placeholder={MIN_PRICE.toString()}
-                            className="w-20 px-2 py-1 text-sm bg-pure-gray-800 border border-pure-gray-700 rounded text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-pure-gray-500"
+                            onChange={(e) => {
+                              console.log('Price change:', item.id, e.target.value)
+                              updateItemPrice(item.id, e.target.value)
+                            }}
+                            placeholder="300"
+                            className="w-24 px-2 py-1.5 text-sm bg-pure-gray-800 border border-pure-gray-700 rounded text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-pure-white"
                           />
-                          <span className="text-xs text-pure-gray-500">min. S/ {MIN_PRICE}</span>
                         </div>
                         
                         <div className="flex items-center justify-between">
