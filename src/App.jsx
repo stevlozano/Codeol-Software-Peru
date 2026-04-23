@@ -2,11 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './sections/Hero'
 import Stats from './sections/Stats'
-import Services from './sections/Services'
-import Portfolio from './sections/Portfolio'
-import IndustryServices from './sections/IndustryServices'
-import Pricing from './sections/Pricing'
-import Contact from './sections/Contact'
+import BriefOverview from './sections/BriefOverview'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import EcommerceDemo from './pages/EcommerceDemo'
@@ -15,6 +11,11 @@ import FintechLandingDemo from './pages/FintechLandingDemo'
 import RealEstateDemo from './pages/RealEstateDemo'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import ServicesPage from './pages/ServicesPage'
+import PortfolioPage from './pages/PortfolioPage'
+import IndustriesPage from './pages/IndustriesPage'
+import PricingPage from './pages/PricingPage'
+import ContactPage from './pages/ContactPage'
 
 function HomePage() {
   return (
@@ -23,11 +24,7 @@ function HomePage() {
       <main>
         <Hero />
         <Stats />
-        <Services />
-        <Portfolio />
-        <IndustryServices />
-        <Pricing />
-        <Contact />
+        <BriefOverview />
       </main>
       <Footer />
       <Chatbot />
@@ -40,6 +37,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/industries" element={<IndustriesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/demo/ecommerce-moda" element={<EcommerceDemo />} />
         <Route path="/demo/sistema-erp" element={<ERPDemo />} />
         <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />

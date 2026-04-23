@@ -5,11 +5,11 @@ import { ArrowUpRight } from 'lucide-react'
 import ProjectModal from './ProjectModal'
 
 const navLinks = [
-  { name: 'Servicios', href: '#services' },
-  { name: 'Portafolio', href: '#portfolio' },
-  { name: 'Industrias', href: '#industries' },
-  { name: 'Precios', href: '#pricing' },
-  { name: 'Contacto', href: '#contact' },
+  { name: 'Servicios', to: '/services' },
+  { name: 'Portafolio', to: '/portfolio' },
+  { name: 'Industrias', to: '/industries' },
+  { name: 'Precios', to: '/pricing' },
+  { name: 'Contacto', to: '/contact' },
 ]
 
 export default function Navbar() {
@@ -77,9 +77,9 @@ export default function Navbar() {
           {/* Desktop Links */}
           <div className="hidden md:flex items-center">
             {navLinks.map((link, index) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.to}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 className="relative px-4 py-2 text-xs tracking-[0.15em] uppercase text-pure-gray-400 hover:text-pure-white transition-colors duration-300"
@@ -93,7 +93,7 @@ export default function Navbar() {
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -139,22 +139,25 @@ export default function Navbar() {
           >
             <div className="flex flex-col justify-center items-center h-full px-6">
               {navLinks.map((link, index) => (
-                <motion.a
+                <motion.div
                   key={link.name}
-                  href={link.href}
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  transition={{ 
-                    duration: 0.5, 
+                  transition={{
+                    duration: 0.5,
                     delay: index * 0.1,
                     ease: [0.22, 1, 0.36, 1]
                   }}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="py-4 text-3xl font-light tracking-[0.05em] text-pure-white hover:text-pure-gray-400 transition-colors"
                 >
-                  {link.name}
-                </motion.a>
+                  <Link
+                    to={link.to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-4 text-3xl font-light tracking-[0.05em] text-pure-white hover:text-pure-gray-400 transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </motion.div>
               ))}
               
               <motion.button
