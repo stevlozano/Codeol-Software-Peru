@@ -52,15 +52,16 @@ export default function Navbar() {
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-6 left-1/2 -translate-x-1/2 z-50"
+        className="fixed top-6 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8"
       >
-        <div 
-          className={`flex items-center gap-1 px-2 py-2 rounded-full transition-all duration-500 ${
-            isScrolled 
-              ? 'bg-pure-black/80 backdrop-blur-xl border border-pure-gray-800/50' 
-              : 'bg-pure-black/40 backdrop-blur-md'
-          }`}
-        >
+        <div className="max-w-fit mx-auto">
+          <div
+            className={`flex items-center gap-1 px-2 py-2 rounded-full transition-all duration-500 ${
+              isScrolled
+                ? 'bg-pure-black/80 backdrop-blur-xl border border-pure-gray-800/50'
+                : 'bg-pure-black/40 backdrop-blur-md'
+            }`}
+          >
           {/* Logo */}
           <Link
             to="/"
@@ -121,6 +122,7 @@ export default function Navbar() {
               className="w-4 h-px bg-pure-white block"
             />
           </button>
+        </div>
         </div>
       </motion.nav>
 
