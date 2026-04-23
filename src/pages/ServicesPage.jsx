@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import Chatbot from '../components/Chatbot'
 import Services from '../sections/Services'
 
 export default function ServicesPage() {
@@ -10,6 +11,7 @@ export default function ServicesPage() {
         <Services />
       </main>
       <Footer />
+      <Chatbot />
     </div>
   )
 }

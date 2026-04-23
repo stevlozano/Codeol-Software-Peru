@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import Chatbot from '../components/Chatbot'
 import Portfolio from '../sections/Portfolio'
 
 export default function PortfolioPage() {
@@ -10,6 +11,7 @@ export default function PortfolioPage() {
         <Portfolio />
       </main>
       <Footer />
+      <Chatbot />
     </div>
   )
 }

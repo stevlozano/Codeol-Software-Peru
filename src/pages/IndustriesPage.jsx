@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import Chatbot from '../components/Chatbot'
 import IndustryServices from '../sections/IndustryServices'
 
 export default function IndustriesPage() {
@@ -10,6 +11,7 @@ export default function IndustriesPage() {
         <IndustryServices />
       </main>
       <Footer />
+      <Chatbot />
     </div>
   )
 }

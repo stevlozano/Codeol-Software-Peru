@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import Chatbot from '../components/Chatbot'
 
 export default function PrivacyPolicy() {
   return (
@@ -97,6 +98,7 @@ export default function PrivacyPolicy() {
         </div>
       </main>
       <Footer />
+      <Chatbot />
     </div>
   )
 }
