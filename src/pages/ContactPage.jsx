@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Chatbot from '../components/Chatbot'
+import Cart from '../components/Cart'
 import Contact from '../sections/Contact'
 
 export default function ContactPage() {
@@ -12,6 +13,7 @@ export default function ContactPage() {
       </main>
       <Footer />
       <Chatbot />
+      <Cart />
     </div>
   )
 }

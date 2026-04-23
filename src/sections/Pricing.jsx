@@ -1,10 +1,12 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { Check, ArrowUpRight, Zap, TrendingUp, Users, Globe } from 'lucide-react'
+import { Check, ArrowUpRight, Zap, TrendingUp, Users, Globe, Plus } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
+import { useCart } from '../context/CartContext'
 
 const plans = [
   {
+    id: 'plan-web-esencial',
     name: 'Web Esencial',
     subtitle: 'Para emprendedores',
     price: 'Cotizar',
@@ -26,6 +28,7 @@ const plans = [
     popular: false,
   },
   {
+    id: 'plan-web-profesional',
     name: 'Web Profesional',
     subtitle: 'Para negocios en crecimiento',
     price: 'Cotizar',
@@ -49,6 +52,7 @@ const plans = [
     popular: true,
   },
   {
+    id: 'plan-ecommerce',
     name: 'E-commerce',
     subtitle: 'Tienda online completa',
     price: 'Cotizar',
@@ -98,6 +102,18 @@ export default function Pricing() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { addToCart, setIsCartOpen } = useCart()
+
+  const handleAddToCart = (plan) => {
+    addToCart({
+      id: plan.id,
+      name: plan.name,
+      subtitle: plan.subtitle,
+      price: plan.price,
+      icon: Zap
+    })
+    setIsCartOpen(true)
+  }
 
   const handleSelectPlan = (plan) => {
     const serviceMap = {
@@ -209,18 +225,27 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              {/* CTA */}
-              <button
-                onClick={() => handleSelectPlan(plan)}
-                className={`inline-flex items-center justify-center w-full gap-2 px-6 py-4 text-sm font-medium rounded-full transition-all duration-300 cursor-pointer ${
-                  plan.popular
-                    ? 'bg-pure-white text-pure-black hover:bg-pure-gray-200'
-                    : 'border border-pure-gray-700 text-pure-white hover:bg-pure-gray-800'
-                }`}
-              >
-                {plan.cta}
-                <ArrowUpRight size={14} />
-              </button>
+              {/* CTA Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleAddToCart(plan)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-full bg-pure-gray-800 text-pure-white hover:bg-pure-gray-700 transition-all duration-300 cursor-pointer"
+                >
+                  <Plus size={16} />
+                  Agregar
+                </button>
+                <button
+                  onClick={() => handleSelectPlan(plan)}
+                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-full transition-all duration-300 cursor-pointer ${
+                    plan.popular
+                      ? 'bg-pure-white text-pure-black hover:bg-pure-gray-200'
+                      : 'border border-pure-gray-700 text-pure-white hover:bg-pure-gray-800'
+                  }`}
+                >
+                  Cotizar
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>

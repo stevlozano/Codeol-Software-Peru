@@ -8,12 +8,15 @@ import {
   Database, 
   Code2, 
   ArrowUpRight,
-  Check
+  Check,
+  Plus
 } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
+import { useCart } from '../context/CartContext'
 
 const services = [
   {
+    id: 'web-moderna',
     icon: Layout,
     title: 'Páginas Web Modernas',
     subtitle: 'Diseño minimalista y profesional',
@@ -23,6 +26,7 @@ const services = [
     popular: true,
   },
   {
+    id: 'sistemas-personalizados',
     icon: Code2,
     title: 'Sistemas Personalizados',
     subtitle: 'Soluciones a medida',
@@ -32,6 +36,7 @@ const services = [
     popular: false,
   },
   {
+    id: 'ecommerce',
     icon: ShoppingCart,
     title: 'E-commerce',
     subtitle: 'Tiendas online que venden',
@@ -41,6 +46,7 @@ const services = [
     popular: false,
   },
   {
+    id: 'aplicaciones-web',
     icon: Smartphone,
     title: 'Aplicaciones Web',
     subtitle: 'Web apps progresivas',
@@ -50,6 +56,7 @@ const services = [
     popular: false,
   },
   {
+    id: 'sistemas-gestion',
     icon: Database,
     title: 'Sistemas de Gestión',
     subtitle: 'ERP y CRM personalizados',
@@ -59,6 +66,7 @@ const services = [
     popular: false,
   },
   {
+    id: 'landing-pages',
     icon: Globe,
     title: 'Landing Pages',
     subtitle: 'Páginas de conversión',
@@ -74,6 +82,18 @@ export default function Services() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedService, setSelectedService] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { addToCart, setIsCartOpen } = useCart()
+
+  const handleAddToCart = (service) => {
+    addToCart({
+      id: service.id,
+      name: service.title,
+      subtitle: service.subtitle,
+      price: service.price,
+      icon: service.icon
+    })
+    setIsCartOpen(true)
+  }
 
   const handleSolicitar = (service) => {
     const serviceMap = {
@@ -192,17 +212,26 @@ export default function Services() {
               {/* Price & CTA */}
               <div className="pt-6 border-t border-pure-gray-800">
                 <p className="text-lg font-semibold mb-4">{service.price}</p>
-                <button
-                  onClick={() => handleSolicitar(service)}
-                  className={`inline-flex items-center justify-center w-full gap-2 px-6 py-3 text-sm font-medium rounded-full transition-all duration-300 cursor-pointer ${
-                    service.popular
-                      ? 'bg-pure-white text-pure-black hover:bg-pure-gray-200'
-                      : 'border border-pure-gray-700 text-pure-white hover:bg-pure-gray-800'
-                  }`}
-                >
-                  Solicitar información
-                  <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleAddToCart(service)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-full bg-pure-gray-800 text-pure-white hover:bg-pure-gray-700 transition-all duration-300 cursor-pointer"
+                  >
+                    <Plus size={16} />
+                    Agregar
+                  </button>
+                  <button
+                    onClick={() => handleSolicitar(service)}
+                    className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-full transition-all duration-300 cursor-pointer ${
+                      service.popular
+                        ? 'bg-pure-white text-pure-black hover:bg-pure-gray-200'
+                        : 'border border-pure-gray-700 text-pure-white hover:bg-pure-gray-800'
+                    }`}
+                  >
+                    Cotizar
+                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           ))}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, ShoppingBag } from 'lucide-react'
 import ProjectModal from './ProjectModal'
+import { useCart } from '../context/CartContext'
 
 const navLinks = [
   { name: 'Servicios', to: '/services' },
@@ -15,6 +16,7 @@ const navLinks = [
 
 export default function Navbar() {
   const location = useLocation()
+  const { totalItems, setIsCartOpen } = useCart()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState(null)
@@ -103,6 +105,19 @@ export default function Navbar() {
               )
             })}
           </div>
+
+          {/* Cart Button */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="hidden md:flex items-center gap-2 ml-2 px-3 py-2 text-xs tracking-[0.1em] uppercase bg-pure-gray-800 text-pure-white rounded-full hover:bg-pure-gray-700 transition-colors duration-300 cursor-pointer relative"
+          >
+            <ShoppingBag size={14} />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-pure-white text-pure-black text-xs font-bold rounded-full flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </button>
 
           {/* CTA Button */}
           <button

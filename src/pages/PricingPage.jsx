@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Chatbot from '../components/Chatbot'
+import Cart from '../components/Cart'
 import Pricing from '../sections/Pricing'
 
 export default function PricingPage() {
@@ -12,6 +13,7 @@ export default function PricingPage() {
       </main>
       <Footer />
       <Chatbot />
+      <Cart />
     </div>
   )
 }
