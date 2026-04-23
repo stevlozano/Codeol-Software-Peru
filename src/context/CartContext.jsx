@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const CartContext = createContext()
 
+export const MIN_PRICE = 300
+
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('codeol-cart')
@@ -13,15 +15,19 @@ export function CartProvider({ children }) {
     localStorage.setItem('codeol-cart', JSON.stringify(cart))
   }, [cart])
 
-  const addToCart = (item) => {
+  const addToCart = (item, customPrice = null) => {
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id)
       if (existing) {
         return prev.map(i => 
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id ? { 
+            ...i, 
+            quantity: i.quantity + 1,
+            customPrice: customPrice || i.customPrice 
+          } : i
         )
       }
-      return [...prev, { ...item, quantity: 1 }]
+      return [...prev, { ...item, quantity: 1, customPrice }]
     })
   }
 
@@ -39,13 +45,20 @@ export function CartProvider({ children }) {
     )
   }
 
+  const updateItemPrice = (id, customPrice) => {
+    const price = Math.max(MIN_PRICE, parseFloat(customPrice) || MIN_PRICE)
+    setCart(prev =>
+      prev.map(item => item.id === id ? { ...item, customPrice: price } : item)
+    )
+  }
+
   const clearCart = () => {
     setCart([])
   }
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = cart.reduce((sum, item) => {
-    const price = item.price === 'Cotizar' ? 0 : parseFloat(item.price.replace(/[^0-9]/g, ''))
+    const price = item.customPrice || (item.price === 'Cotizar' ? 0 : parseFloat(item.price.replace(/[^0-9]/g, '')))
     return sum + (price * item.quantity)
   }, 0)
 
@@ -55,9 +68,11 @@ export function CartProvider({ children }) {
       addToCart,
       removeFromCart,
       updateQuantity,
+      updateItemPrice,
       clearCart,
       totalItems,
       totalPrice,
+      MIN_PRICE,
       isCartOpen,
       setIsCartOpen
     }}>

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { 
   X, 
   Minus, 
@@ -8,7 +9,8 @@ import {
   Trash2, 
   ShoppingBag, 
   ArrowRight,
-  CreditCard
+  CreditCard,
+  Pencil
 } from 'lucide-react'
 
 export default function Cart() {
@@ -16,8 +18,10 @@ export default function Cart() {
     cart, 
     removeFromCart, 
     updateQuantity, 
+    updateItemPrice,
     totalItems, 
     totalPrice,
+    MIN_PRICE,
     isCartOpen, 
     setIsCartOpen 
   } = useCart()
@@ -99,6 +103,20 @@ export default function Cart() {
                         <h3 className="font-medium text-sm truncate">{item.name}</h3>
                         <p className="text-xs text-pure-gray-500 mb-2">{item.subtitle}</p>
                         
+                        {/* Custom Price Input */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs text-pure-gray-400">S/</span>
+                          <input
+                            type="number"
+                            min={MIN_PRICE}
+                            value={item.customPrice || ''}
+                            onChange={(e) => updateItemPrice(item.id, e.target.value)}
+                            placeholder={MIN_PRICE.toString()}
+                            className="w-20 px-2 py-1 text-sm bg-pure-gray-800 border border-pure-gray-700 rounded text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-pure-gray-500"
+                          />
+                          <span className="text-xs text-pure-gray-500">min. S/ {MIN_PRICE}</span>
+                        </div>
+                        
                         <div className="flex items-center justify-between">
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-2">
@@ -121,7 +139,7 @@ export default function Cart() {
 
                           {/* Price */}
                           <span className="text-sm font-medium">
-                            {item.price === 'Cotizar' ? 'Cotizar' : item.price}
+                            {item.customPrice ? `S/ ${(item.customPrice * item.quantity).toLocaleString()}` : 'Cotizar'}
                           </span>
                         </div>
                       </div>

@@ -12,7 +12,7 @@ import {
   Plus
 } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
-import { useCart } from '../context/CartContext'
+import { useCart, MIN_PRICE } from '../context/CartContext'
 
 const services = [
   {
@@ -82,16 +82,23 @@ export default function Services() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedService, setSelectedService] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [customPrices, setCustomPrices] = useState({})
   const { addToCart, setIsCartOpen } = useCart()
 
+  const handlePriceChange = (serviceId, value) => {
+    const price = Math.max(MIN_PRICE, parseFloat(value) || MIN_PRICE)
+    setCustomPrices(prev => ({ ...prev, [serviceId]: price }))
+  }
+
   const handleAddToCart = (service) => {
+    const customPrice = customPrices[service.id]
     addToCart({
       id: service.id,
       name: service.title,
       subtitle: service.subtitle,
       price: service.price,
       icon: service.icon
-    })
+    }, customPrice)
     setIsCartOpen(true)
   }
 
@@ -211,7 +218,24 @@ export default function Services() {
 
               {/* Price & CTA */}
               <div className="pt-6 border-t border-pure-gray-800">
-                <p className="text-lg font-semibold mb-4">{service.price}</p>
+                <p className="text-lg font-semibold mb-2">{service.price}</p>
+                
+                {/* Custom Price Input */}
+                <div className="mb-4">
+                  <label className="text-xs text-pure-gray-500 block mb-1">Tu presupuesto (mín. S/ {MIN_PRICE})</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-pure-gray-400">S/</span>
+                    <input
+                      type="number"
+                      min={MIN_PRICE}
+                      value={customPrices[service.id] || ''}
+                      onChange={(e) => handlePriceChange(service.id, e.target.value)}
+                      placeholder={MIN_PRICE.toString()}
+                      className="flex-1 px-3 py-2 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-sm text-pure-white placeholder-pure-gray-600 focus:outline-none focus:border-pure-gray-600"
+                    />
+                  </div>
+                </div>
+                
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleAddToCart(service)}

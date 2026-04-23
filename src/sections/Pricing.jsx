@@ -2,7 +2,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Check, ArrowUpRight, Zap, TrendingUp, Users, Globe, Plus } from 'lucide-react'
 import ProjectModal from '../components/ProjectModal'
-import { useCart } from '../context/CartContext'
+import { useCart, MIN_PRICE } from '../context/CartContext'
 
 const plans = [
   {
@@ -102,16 +102,23 @@ export default function Pricing() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [customPrices, setCustomPrices] = useState({})
   const { addToCart, setIsCartOpen } = useCart()
 
+  const handlePriceChange = (planId, value) => {
+    const price = Math.max(MIN_PRICE, parseFloat(value) || MIN_PRICE)
+    setCustomPrices(prev => ({ ...prev, [planId]: price }))
+  }
+
   const handleAddToCart = (plan) => {
+    const customPrice = customPrices[plan.id]
     addToCart({
       id: plan.id,
       name: plan.name,
       subtitle: plan.subtitle,
       price: plan.price,
       icon: Zap
-    })
+    }, customPrice)
     setIsCartOpen(true)
   }
 
@@ -197,9 +204,25 @@ export default function Pricing() {
               </div>
 
               {/* Price - CTA focused */}
-              <div className="mb-8">
+              <div className="mb-4">
                 <span className="text-2xl sm:text-3xl font-bold text-pure-white">{plan.price}</span>
                 <p className="text-sm text-pure-gray-500 mt-1">Personalizado según tu proyecto</p>
+              </div>
+
+              {/* Custom Price Input */}
+              <div className="mb-6">
+                <label className="text-xs text-pure-gray-500 block mb-1">Tu presupuesto (mín. S/ {MIN_PRICE})</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-pure-gray-400">S/</span>
+                  <input
+                    type="number"
+                    min={MIN_PRICE}
+                    value={customPrices[plan.id] || ''}
+                    onChange={(e) => handlePriceChange(plan.id, e.target.value)}
+                    placeholder={MIN_PRICE.toString()}
+                    className="flex-1 px-3 py-2 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-sm text-pure-white placeholder-pure-gray-600 focus:outline-none focus:border-pure-gray-600"
+                  />
+                </div>
               </div>
 
               {/* Results */}
