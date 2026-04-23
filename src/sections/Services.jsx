@@ -19,7 +19,7 @@ const services = [
     subtitle: 'Diseño minimalista y profesional',
     description: 'Creamos páginas web con diseños modernos, minimalistas y totalmente responsivos que capturan la esencia de tu marca y generan resultados.',
     features: ['Diseño UI/UX personalizado', '100% Responsive', 'Optimización SEO', 'Alto rendimiento'],
-    price: 'Desde S/ 1,200',
+    price: 'Cotizar',
     popular: true,
   },
   {
@@ -28,7 +28,7 @@ const services = [
     subtitle: 'Soluciones a medida',
     description: 'Desarrollamos sistemas y aplicaciones web personalizadas según las necesidades específicas de tu negocio, adaptadas a tu presupuesto.',
     features: ['Análisis de requerimientos', 'Desarrollo ágil', 'Integración con APIs', 'Soporte continuo'],
-    price: 'Cotización personalizada',
+    price: 'Cotizar',
     popular: false,
   },
   {
@@ -37,7 +37,7 @@ const services = [
     subtitle: 'Tiendas online que venden',
     description: 'Diseñamos y desarrollamos tiendas virtuales optimizadas para convertir visitantes en clientes, con pasarelas de pago integradas.',
     features: ['Catálogo de productos', 'Pasarela de pagos', 'Gestión de inventario', 'Panel administrativo'],
-    price: 'Desde S/ 2,500',
+    price: 'Cotizar',
     popular: false,
   },
   {
@@ -46,7 +46,7 @@ const services = [
     subtitle: 'Web apps progresivas',
     description: 'Creamos aplicaciones web progresivas (PWA) que funcionan como apps nativas, accesibles desde cualquier dispositivo.',
     features: ['Instalable en dispositivos', 'Funciona offline', 'Notificaciones push', 'Experiencia nativa'],
-    price: 'Desde S/ 3,000',
+    price: 'Cotizar',
     popular: false,
   },
   {
@@ -55,7 +55,7 @@ const services = [
     subtitle: 'ERP y CRM personalizados',
     description: 'Sistemas integrales para gestionar tu empresa: inventario, clientes, ventas, facturación y más, todo en un solo lugar.',
     features: ['Gestión de inventario', 'CRM integrado', 'Reportes en tiempo real', 'Múltiples usuarios'],
-    price: 'Cotización personalizada',
+    price: 'Cotizar',
     popular: false,
   },
   {
@@ -64,7 +64,7 @@ const services = [
     subtitle: 'Páginas de conversión',
     description: 'Landing pages diseñadas para maximizar conversiones, ideales para campañas publicitarias y lanzamientos de productos.',
     features: ['Diseño persuasivo', 'A/B testing', 'Formularios optimizados', 'Analytics integrado'],
-    price: 'Desde S/ 800',
+    price: 'Cotizar',
     popular: false,
   },
 ]
