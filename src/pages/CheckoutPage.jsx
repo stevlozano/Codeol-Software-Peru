@@ -7,24 +7,18 @@ import Footer from '../components/Footer'
 import Chatbot from '../components/Chatbot'
 import { 
   ArrowLeft, 
-  CreditCard, 
   Smartphone, 
   Wallet, 
   Building2,
   CheckCircle,
   Loader2,
-  Lock,
-  Banknote,
-  Landmark
+  Lock
 } from 'lucide-react'
 
 const paymentMethods = [
-  { id: 'tarjeta', name: 'Tarjeta de crédito/débito', icon: CreditCard, color: 'bg-blue-500' },
   { id: 'yape', name: 'Yape', icon: Smartphone, color: 'bg-purple-500' },
   { id: 'plin', name: 'Plin', icon: Wallet, color: 'bg-green-500' },
   { id: 'lemon', name: 'Lemon Cash', icon: Wallet, color: 'bg-yellow-500' },
-  { id: 'interbank', name: 'Interbank Negocios', icon: Landmark, color: 'bg-orange-500' },
-  { id: 'efectivo', name: 'Pago Efectivo', icon: Banknote, color: 'bg-emerald-600' },
   { id: 'transferencia', name: 'Transferencia bancaria', icon: Building2, color: 'bg-pure-gray-600' },
 ]
 
@@ -355,40 +349,6 @@ export default function CheckoutPage() {
                       <p className="text-xs text-pure-gray-500">
                         Transfiere desde tu app de Lemon Cash. Envía el comprobante por WhatsApp para confirmar.
                       </p>
-                    </div>
-                  )}
-
-                  {selectedPayment === 'interbank' && (
-                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6">
-                      <h3 className="font-semibold mb-4">Interbank Negocios</h3>
-                      <div className="p-4 bg-pure-gray-800/50 rounded-lg mb-4">
-                        <p className="text-xs text-pure-gray-500 mb-1">Número de cuenta</p>
-                        <p className="font-mono text-sm">(Agrega tu número de cuenta Interbank aquí)</p>
-                        <p className="text-xs text-pure-gray-500 mt-2">Codeol Software Perú S.A.C.</p>
-                      </div>
-                      <p className="text-xs text-pure-gray-500">
-                        Transfiere desde tu banca por internet o app de Interbank. Envía el comprobante por WhatsApp.
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedPayment === 'efectivo' && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6">
-                      <h3 className="font-semibold mb-4">Pago en Efectivo</h3>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-pure-gray-800/50 rounded-lg">
-                          <p className="text-sm font-medium mb-2">Agentes autorizados:</p>
-                          <ul className="text-xs text-pure-gray-400 space-y-1">
-                            <li>• Kasnet (código de empresa: solicitar)</li>
-                            <li>• Western Union</li>
-                            <li>• Fullcarga</li>
-                            <li>• Desde banca por internet (Pago Efectivo)</li>
-                          </ul>
-                        </div>
-                        <p className="text-xs text-pure-gray-500">
-                          Genera un código de pago y paga en cualquier agente. El pago se acredita en 24-48 horas.
-                        </p>
-                      </div>
                     </div>
                   )}
 
