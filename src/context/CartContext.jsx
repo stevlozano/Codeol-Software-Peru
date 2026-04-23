@@ -16,6 +16,8 @@ export function CartProvider({ children }) {
   }, [cart])
 
   const addToCart = (item, customPrice = null) => {
+    // If customPrice is provided, ensure it's at least MIN_PRICE
+    const finalPrice = customPrice ? Math.max(MIN_PRICE, customPrice) : null
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id)
       if (existing) {
@@ -23,11 +25,11 @@ export function CartProvider({ children }) {
           i.id === item.id ? { 
             ...i, 
             quantity: i.quantity + 1,
-            customPrice: customPrice || i.customPrice 
+            customPrice: finalPrice || i.customPrice 
           } : i
         )
       }
-      return [...prev, { ...item, quantity: 1, customPrice }]
+      return [...prev, { ...item, quantity: 1, customPrice: finalPrice }]
     })
   }
 
@@ -46,9 +48,9 @@ export function CartProvider({ children }) {
   }
 
   const updateItemPrice = (id, customPrice) => {
-    const price = Math.max(MIN_PRICE, parseFloat(customPrice) || MIN_PRICE)
+    // Store the price as-is, will be validated on blur
     setCart(prev =>
-      prev.map(item => item.id === id ? { ...item, customPrice: price } : item)
+      prev.map(item => item.id === id ? { ...item, customPrice: customPrice } : item)
     )
   }
 
@@ -58,7 +60,7 @@ export function CartProvider({ children }) {
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = cart.reduce((sum, item) => {
-    const price = item.customPrice || (item.price === 'Cotizar' ? 0 : parseFloat(item.price.replace(/[^0-9]/g, '')))
+    const price = item.customPrice ? Math.max(MIN_PRICE, parseFloat(item.customPrice) || MIN_PRICE) : (item.price === 'Cotizar' ? 0 : parseFloat(item.price.replace(/[^0-9]/g, '')))
     return sum + (price * item.quantity)
   }, 0)
 

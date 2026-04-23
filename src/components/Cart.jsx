@@ -25,8 +25,26 @@ export default function Cart() {
     isCartOpen, 
     setIsCartOpen 
   } = useCart()
+  const [editingPrices, setEditingPrices] = useState({})
 
   const closeCart = () => setIsCartOpen(false)
+
+  const handlePriceChange = (itemId, value) => {
+    // Allow any value while typing
+    setEditingPrices(prev => ({ ...prev, [itemId]: value }))
+  }
+
+  const handlePriceBlur = (itemId, value) => {
+    // Enforce minimum when leaving the field
+    const num = parseFloat(value) || 0
+    const price = Math.max(MIN_PRICE, num)
+    updateItemPrice(itemId, price)
+    setEditingPrices(prev => {
+      const next = { ...prev }
+      delete next[itemId]
+      return next
+    })
+  }
 
   return (
     <AnimatePresence>
@@ -110,14 +128,13 @@ export default function Cart() {
                             type="number"
                             min={MIN_PRICE}
                             step="10"
-                            value={item.customPrice || ''}
-                            onChange={(e) => {
-                              console.log('Price change:', item.id, e.target.value)
-                              updateItemPrice(item.id, e.target.value)
-                            }}
+                            value={editingPrices[item.id] !== undefined ? editingPrices[item.id] : (item.customPrice || '')}
+                            onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                            onBlur={(e) => handlePriceBlur(item.id, e.target.value)}
                             placeholder="300"
                             className="w-24 px-2 py-1.5 text-sm bg-pure-gray-800 border border-pure-gray-700 rounded text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-pure-white"
                           />
+                          <span className="text-xs text-pure-gray-500">min. S/ {MIN_PRICE}</span>
                         </div>
                         
                         <div className="flex items-center justify-between">
@@ -142,7 +159,7 @@ export default function Cart() {
 
                           {/* Price */}
                           <span className="text-sm font-medium">
-                            {item.customPrice ? `S/ ${(item.customPrice * item.quantity).toLocaleString()}` : 'Cotizar'}
+                            {item.customPrice ? `S/ ${(Math.max(MIN_PRICE, parseFloat(item.customPrice) || MIN_PRICE) * item.quantity).toLocaleString()}` : 'Cotizar'}
                           </span>
                         </div>
                       </div>
