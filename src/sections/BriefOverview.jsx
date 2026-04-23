@@ -44,39 +44,25 @@ export default function BriefOverview() {
   return (
     <section className="py-24 lg:py-32 bg-pure-black">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20">
-          {/* Image */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative"
+            transition={{ duration: 0.6 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6"
           >
-            <div className="relative rounded-2xl overflow-hidden bg-pure-gray-900">
-              <img
-                src="/images/principal.png"
-                alt="Codeol Software"
-                className="w-full h-auto object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-pure-black/20 to-transparent" />
-            </div>
-          </motion.div>
-
-          {/* Text */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            ¿Qué necesitas?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-lg text-pure-gray-400 leading-relaxed"
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
-              ¿Qué necesitas?
-            </h2>
-            <p className="text-lg text-pure-gray-400 leading-relaxed">
-              Explora nuestras soluciones y encuentra la perfecta para tu negocio.
-            </p>
-          </motion.div>
+            Explora nuestras soluciones y encuentra la perfecta para tu negocio.
+          </motion.p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
