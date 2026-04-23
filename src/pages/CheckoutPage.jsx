@@ -307,16 +307,49 @@ export default function CheckoutPage() {
                       <h3 className="font-semibold mb-4">Pago con Yape</h3>
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center">
-                          <span className="text-pure-black text-xs text-center">QR Yape<br/>999 999 999</span>
+                          <span className="text-pure-black text-xs text-center">QR Yape<br/>916 895 252</span>
                         </div>
                         <div>
                           <p className="text-sm text-pure-gray-400 mb-1">Escanea el QR o busca:</p>
-                          <p className="text-lg font-mono font-medium">999 999 999</p>
+                          <p className="text-lg font-mono font-medium">916 895 252</p>
                           <p className="text-sm text-pure-gray-400">Codeol Software</p>
                         </div>
                       </div>
                       <p className="text-xs text-pure-gray-500">
                         Después de pagar, envía el comprobante por WhatsApp para confirmar tu orden.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedPayment === 'plin' && (
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6">
+                      <h3 className="font-semibold mb-4">Pago con Plin</h3>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center">
+                          <span className="text-pure-black text-xs text-center">QR Plin<br/>916 895 252</span>
+                        </div>
+                        <div>
+                          <p className="text-sm text-pure-gray-400 mb-1">Escanea el QR o busca:</p>
+                          <p className="text-lg font-mono font-medium">916 895 252</p>
+                          <p className="text-sm text-pure-gray-400">Codeol Software</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-pure-gray-500">
+                        Después de pagar, envía el comprobante por WhatsApp para confirmar tu orden.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedPayment === 'lemon' && (
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6">
+                      <h3 className="font-semibold mb-4">Pago con Lemon Cash</h3>
+                      <div className="p-4 bg-pure-gray-800/50 rounded-lg mb-4">
+                        <p className="text-xs text-pure-gray-500 mb-1">CVU / Alias</p>
+                        <p className="font-mono text-sm break-all">92200300000265853293</p>
+                        <p className="text-xs text-pure-gray-500 mt-2">Codeol Software Perú</p>
+                      </div>
+                      <p className="text-xs text-pure-gray-500">
+                        Transfiere desde tu app de Lemon Cash. Envía el comprobante por WhatsApp para confirmar.
                       </p>
                     </div>
                   )}
@@ -327,15 +360,18 @@ export default function CheckoutPage() {
                       <div className="space-y-3">
                         <div className="p-3 bg-pure-gray-800/50 rounded-lg">
                           <p className="text-xs text-pure-gray-500">Caja Arequipa - P51</p>
-                          <p className="font-mono text-sm">123-4567890123</p>
+                          <p className="font-mono text-sm">80304300536509700194</p>
                           <p className="text-xs text-pure-gray-500">Codeol Software Perú S.A.C.</p>
                         </div>
                         <div className="p-3 bg-pure-gray-800/50 rounded-lg">
                           <p className="text-xs text-pure-gray-500">Scotiabank</p>
-                          <p className="font-mono text-sm">009-1234567</p>
+                          <p className="font-mono text-sm">00919620211027751077</p>
                           <p className="text-xs text-pure-gray-500">Codeol Software Perú S.A.C.</p>
                         </div>
                       </div>
+                      <p className="text-xs text-pure-gray-500 mt-4">
+                        Después de transferir, envía el comprobante por WhatsApp para confirmar tu orden.
+                      </p>
                     </div>
                   )}
 
