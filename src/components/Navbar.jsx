@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import ProjectModal from './ProjectModal'
@@ -61,15 +62,15 @@ export default function Navbar() {
           }`}
         >
           {/* Logo */}
-          <a 
-            href="#hero" 
+          <Link
+            to="/"
             className="flex items-center gap-3 px-4 py-2"
           >
             <img src="/images/logooriginal.png" alt="Codeol" className="w-7 h-7 object-contain" />
             <span className="text-sm font-medium tracking-[0.2em] text-pure-white hover:text-pure-gray-300 transition-colors duration-300">
               CODEOL
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center">
