@@ -43,12 +43,35 @@ export default function CheckoutPage() {
 
   const handlePayment = async () => {
     setIsProcessing(true)
+    
+    // Save order to localStorage for admin dashboard
+    const order = {
+      customer: formData,
+      items: cart,
+      totalPrice: totalPrice,
+      paymentMethod: selectedPayment,
+      status: 'pending'
+    }
+    
+    const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
+    const newOrder = {
+      ...order,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    }
+    orders.unshift(newOrder)
+    localStorage.setItem('codeol-orders', JSON.stringify(orders))
+    
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000))
     setIsProcessing(false)
     setIsCompleted(true)
     clearCart()
-    setTimeout(() => navigate('/'), 5000)
+    
+    // Store order reference for customer tracking
+    localStorage.setItem('last-order-id', newOrder.id)
+    
+    setTimeout(() => navigate('/order-status'), 5000)
   }
 
   if (cart.length === 0 && !isCompleted) {

@@ -18,6 +18,8 @@ import IndustriesPage from './pages/IndustriesPage'
 import PricingPage from './pages/PricingPage'
 import ContactPage from './pages/ContactPage'
 import CheckoutPage from './pages/CheckoutPage'
+import AdminDashboard from './pages/AdminDashboard'
+import OrderStatus from './pages/OrderStatus'
 import { CartProvider } from './context/CartContext'
 
 function HomePage() {
@@ -48,6 +50,8 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/order-status" element={<OrderStatus />} />
           <Route path="/demo/ecommerce-moda" element={<EcommerceDemo />} />
           <Route path="/demo/sistema-erp" element={<ERPDemo />} />
           <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />
