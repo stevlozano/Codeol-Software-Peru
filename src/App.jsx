@@ -17,7 +17,6 @@ import PortfolioPage from './pages/PortfolioPage'
 import IndustriesPage from './pages/IndustriesPage'
 import PricingPage from './pages/PricingPage'
 import ContactPage from './pages/ContactPage'
-import PaymentMethodsPage from './pages/PaymentMethodsPage'
 import CheckoutPage from './pages/CheckoutPage'
 import { CartProvider } from './context/CartContext'
 
@@ -55,7 +54,6 @@ function App() {
           <Route path="/demo/portal-inmobiliario" element={<RealEstateDemo />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         </Routes>
       </Router>
     </CartProvider>
