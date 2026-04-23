@@ -12,7 +12,8 @@ import {
   Building2,
   CheckCircle,
   Loader2,
-  Lock
+  Lock,
+  CreditCard
 } from 'lucide-react'
 
 const paymentMethods = [
