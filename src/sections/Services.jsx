@@ -86,7 +86,25 @@ export default function Services() {
   const { addToCart, setIsCartOpen } = useCart()
 
   const handlePriceChange = (serviceId, value) => {
-    const price = Math.max(MIN_PRICE, parseFloat(value) || MIN_PRICE)
+    // Allow empty or any number while typing, don't enforce min yet
+    if (value === '' || value === null) {
+      setCustomPrices(prev => {
+        const next = { ...prev }
+        delete next[serviceId]
+        return next
+      })
+      return
+    }
+    const num = parseFloat(value)
+    if (!isNaN(num)) {
+      setCustomPrices(prev => ({ ...prev, [serviceId]: num }))
+    }
+  }
+
+  const handlePriceBlur = (serviceId, value) => {
+    // Enforce minimum when user leaves the field
+    const num = parseFloat(value) || 0
+    const price = Math.max(MIN_PRICE, num)
     setCustomPrices(prev => ({ ...prev, [serviceId]: price }))
   }
 
@@ -230,8 +248,9 @@ export default function Services() {
                       min={MIN_PRICE}
                       value={customPrices[service.id] || ''}
                       onChange={(e) => handlePriceChange(service.id, e.target.value)}
-                      placeholder={MIN_PRICE.toString()}
-                      className="flex-1 px-3 py-2 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-sm text-pure-white placeholder-pure-gray-600 focus:outline-none focus:border-pure-gray-600"
+                      onBlur={(e) => handlePriceBlur(service.id, e.target.value)}
+                      placeholder="300"
+                      className="flex-1 px-3 py-2 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-sm text-pure-white placeholder-pure-gray-600 focus:outline-none focus:border-pure-white"
                     />
                   </div>
                 </div>
