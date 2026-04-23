@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles, Phone } from 'lucide-react'
+import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles, Phone, ShoppingBag } from 'lucide-react'
+import { useCart } from '../context/CartContext'
 
 const GEMINI_API_KEY = 'AIzaSyDJY2myyyQLlfFNr-yzW5Gf1T9B02_J6j8'
 
@@ -69,6 +70,7 @@ export default function Chatbot() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+  const { totalItems, setIsCartOpen } = useCart()
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -161,6 +163,22 @@ export default function Chatbot() {
 
   return (
     <>
+      {/* Mobile Cart Button - Only visible on mobile, above WhatsApp */}
+      {totalItems > 0 && (
+        <motion.button
+          onClick={() => setIsCartOpen(true)}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.2, type: 'spring', duration: 0.6 }}
+          className="md:hidden fixed bottom-[10rem] right-6 z-40 w-14 h-14 bg-pure-white text-pure-black rounded-full flex items-center justify-center shadow-2xl hover:shadow-white/20 hover:bg-pure-gray-200 transition-all duration-300 cursor-pointer"
+        >
+          <ShoppingBag size={22} />
+          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-pure-black text-pure-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-pure-white px-1">
+            {totalItems}
+          </span>
+        </motion.button>
+      )}
+
       {/* WhatsApp Button */}
       <motion.a
         href="https://wa.me/51926974985?text=Hola%20Codeol%2C%20quiero%20cotizar%20un%20proyecto"
