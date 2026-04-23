@@ -65,6 +65,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             to="/"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-3 px-4 py-2"
           >
             <img src="/images/logooriginal.png" alt="Codeol" className="w-7 h-7 object-contain" />
