@@ -17,7 +17,6 @@ import {
 
 const paymentMethods = [
   { id: 'yape', name: 'Yape', icon: Smartphone, color: 'bg-purple-500' },
-  { id: 'plin', name: 'Plin', icon: Wallet, color: 'bg-green-500' },
   { id: 'lemon', name: 'Lemon Cash', icon: Wallet, color: 'bg-yellow-500' },
   { id: 'transferencia', name: 'Transferencia bancaria', icon: Building2, color: 'bg-pure-gray-600' },
 ]
@@ -303,28 +302,13 @@ export default function CheckoutPage() {
                   {selectedPayment === 'yape' && (
                     <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6">
                       <h3 className="font-semibold mb-4">Pago con Yape</h3>
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center">
-                          <span className="text-pure-black text-xs text-center">QR Yape<br/>916 895 252</span>
-                        </div>
-                        <div>
-                          <p className="text-sm text-pure-gray-400 mb-1">Escanea el QR o busca:</p>
-                          <p className="text-lg font-mono font-medium">916 895 252</p>
-                          <p className="text-sm text-pure-gray-400">Codeol Software</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-pure-gray-500">
-                        Después de pagar, envía el comprobante por WhatsApp para confirmar tu orden.
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedPayment === 'plin' && (
-                    <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6">
-                      <h3 className="font-semibold mb-4">Pago con Plin</h3>
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center">
-                          <span className="text-pure-black text-xs text-center">QR Plin<br/>916 895 252</span>
+                      <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                        <div className="w-40 h-40 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                          <img 
+                            src="/src/sections/pagos/yape/yape.png" 
+                            alt="QR Yape" 
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                         <div>
                           <p className="text-sm text-pure-gray-400 mb-1">Escanea el QR o busca:</p>
