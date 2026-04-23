@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import emailjs from 'emailjs-com'
 import { 
   X, 
@@ -7,7 +8,11 @@ import {
   Loader2, 
   CheckCircle, 
   AlertCircle, 
-  ArrowUpRight 
+  ArrowUpRight,
+  CreditCard,
+  Smartphone,
+  Wallet,
+  Building2
 } from 'lucide-react'
 
 export default function ProjectModal({ isOpen, onClose, plan }) {
@@ -230,6 +235,40 @@ export default function ProjectModal({ isOpen, onClose, plan }) {
                         />
                       </div>
 
+                      {/* Payment Methods Info */}
+                      <div className="p-4 bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl mb-4">
+                        <p className="text-xs text-pure-gray-500 uppercase tracking-wider mb-3">Métodos de pago aceptados</p>
+                        <div className="flex flex-wrap gap-3">
+                          <div className="flex items-center gap-1.5 text-sm text-pure-gray-300">
+                            <CreditCard size={14} />
+                            <span>Tarjeta</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-pure-gray-300">
+                            <Smartphone size={14} />
+                            <span>Yape</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-pure-gray-300">
+                            <Wallet size={14} />
+                            <span>Plin</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-pure-gray-300">
+                            <Wallet size={14} />
+                            <span>Lemon</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-pure-gray-300">
+                            <Building2 size={14} />
+                            <span>Transferencia</span>
+                          </div>
+                        </div>
+                        <Link 
+                          to="/payment-methods" 
+                          onClick={onClose}
+                          className="text-xs text-pure-gray-500 hover:text-pure-white mt-2 inline-block transition-colors"
+                        >
+                          Ver todas las opciones →
+                        </Link>
+                      </div>
+
                       <button
                         type="submit"
                         disabled={isSubmitting}
@@ -249,7 +288,7 @@ export default function ProjectModal({ isOpen, onClose, plan }) {
                       </button>
 
                       <p className="text-xs text-pure-gray-600 text-center">
-                        Te responderemos en menos de 24 horas
+                        Te responderemos en menos de 24 horas con los detalles de pago
                       </p>
                     </form>
                   </>

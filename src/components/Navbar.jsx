@@ -9,6 +9,7 @@ const navLinks = [
   { name: 'Portafolio', to: '/portfolio' },
   { name: 'Industrias', to: '/industries' },
   { name: 'Precios', to: '/pricing' },
+  { name: 'Pagos', to: '/payment-methods' },
   { name: 'Contacto', to: '/contact' },
 ]
 
