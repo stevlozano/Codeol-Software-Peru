@@ -141,116 +141,136 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-pure-black flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-pure-gray-800">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-pure-white mb-2 tracking-tight">
-              {showRegister ? 'Registrar Admin' : 'Admin'}
+      <div className="w-full max-w-5xl">
+        <div className="grid md:grid-cols-2 gap-0 bg-pure-gray-900/50 backdrop-blur-sm rounded-2xl border border-pure-gray-800 overflow-hidden">
+          {/* Left Column - Logo */}
+          <div className="bg-pure-gray-800/50 p-12 flex flex-col items-center justify-center border-r border-pure-gray-800">
+            <div className="w-32 h-32 mb-6">
+              <img 
+                src="/images/logooriginal.png" 
+                alt="CODEOL Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-pure-white mb-2 tracking-tight text-center">
+              CODEOL
             </h1>
-            <p className="text-pure-gray-400 text-sm tracking-wide">
-              {showRegister ? 'Crea el primer administrador' : 'Acceso al panel de control'}
+            <p className="text-pure-gray-400 text-sm tracking-wide text-center">
+              Software Perú
             </p>
           </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
+          {/* Right Column - Form */}
+          <div className="p-12">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-pure-white mb-2 tracking-tight">
+                {showRegister ? 'Registrar Admin' : 'Admin Panel'}
+              </h2>
+              <p className="text-pure-gray-400 text-sm tracking-wide">
+                {showRegister ? 'Crea el primer administrador' : 'Acceso al panel de control'}
+              </p>
             </div>
-          )}
 
-          {success && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg mb-6 text-sm">
-              {success}
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
+                {error}
+              </div>
+            )}
 
-          {showRegister ? (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  value={registerData.nombre}
-                  onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
-                  className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
-                  placeholder="Nombre"
-                  required
-                />
+            {success && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg mb-6 text-sm">
+                {success}
               </div>
-              <div>
-                <input
-                  type="email"
-                  value={registerData.email}
-                  onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
-                  placeholder="Email"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="password"
-                  value={registerData.password}
-                  onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
-                  placeholder="Contraseña"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50"
-              >
-                {loading ? 'Registrando...' : 'Registrar'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowRegister(false)}
-                className="w-full py-3 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
-              >
-                Cancelar
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <input
-                  type="email"
-                  value={loginData.email}
-                  onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
-                  placeholder="Email"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
-                  placeholder="Contraseña"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50"
-              >
-                {loading ? 'Iniciando...' : 'Entrar'}
-              </button>
-              {!hasAdmin && (
+            )}
+
+            {showRegister ? (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    value={registerData.nombre}
+                    onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
+                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    placeholder="Nombre"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    value={registerData.email}
+                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    placeholder="Email"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    value={registerData.password}
+                    onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    placeholder="Contraseña"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50 mt-6"
+                >
+                  {loading ? 'Registrando...' : 'Registrar'}
+                </button>
                 <button
                   type="button"
-                  onClick={() => setShowRegister(true)}
+                  onClick={() => setShowRegister(false)}
                   className="w-full py-3 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
                 >
-                  Registrar primer admin
+                  Cancelar
                 </button>
-              )}
-            </form>
-          )}
+              </form>
+            ) : (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <input
+                    type="email"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    placeholder="Email"
+                    required
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    placeholder="Contraseña"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50 mt-6"
+                >
+                  {loading ? 'Iniciando...' : 'Entrar'}
+                </button>
+                {!hasAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRegister(true)}
+                    className="w-full py-3 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
+                  >
+                    Registrar primer admin
+                  </button>
+                )}
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
