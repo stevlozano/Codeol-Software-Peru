@@ -8,7 +8,9 @@ import {
   Check, 
   Clock, 
   X,
-  TrendingUp
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -17,6 +19,8 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState('all') // all, pending, approved, rejected
   const [activeView, setActiveView] = useState('orders') // orders, calendar
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [showDayDetails, setShowDayDetails] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -141,23 +145,63 @@ export default function AdminDashboard() {
   }
 
   const getMonthlyOrders = () => {
-    const today = new Date()
-    const monthOrders = []
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    const firstDayOfMonth = new Date(year, month, 1).getDay()
     
-    for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth(), i)
-      const dayOrders = getOrdersByDate(date)
-      if (dayOrders.length > 0) {
-        monthOrders.push({
-          date,
-          orders: dayOrders,
-          total: dayOrders.reduce((sum, order) => sum + (order.total_price || 0), 0)
-        })
-      }
+    const monthDays = []
+    
+    // Empty cells for days before the first day of month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      monthDays.push(null)
     }
     
-    return monthOrders
+    // Days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(year, month, i)
+      const dayOrders = getOrdersByDate(date)
+      monthDays.push({
+        date,
+        orders: dayOrders,
+        total: dayOrders.reduce((sum, order) => sum + (order.total_price || 0), 0)
+      })
+    }
+    
+    return monthDays
+  }
+
+  const getMonthStats = () => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const monthOrders = orders.filter(order => {
+      const orderDate = new Date(order.created_at)
+      return orderDate.getFullYear() === year && orderDate.getMonth() === month
+    })
+    
+    return {
+      total: monthOrders.length,
+      approved: monthOrders.filter(o => o.status === 'approved').length,
+      pending: monthOrders.filter(o => o.status === 'pending').length,
+      revenue: monthOrders
+        .filter(o => o.status === 'approved')
+        .reduce((sum, order) => sum + (order.total_price || 0), 0)
+    }
+  }
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  const handleDayClick = (dayData) => {
+    if (dayData && dayData.orders.length > 0) {
+      setSelectedDate(dayData)
+      setShowDayDetails(true)
+    }
   }
 
   const totalRevenue = orders
@@ -357,11 +401,108 @@ export default function AdminDashboard() {
         {/* Calendar View */}
         {activeView === 'calendar' && (
           <div className="space-y-6">
+            {/* Monthly Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {(() => {
+                const stats = getMonthStats()
+                return (
+                  <>
+                    <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-pure-gray-800">
+                      <p className="text-pure-gray-400 text-xs tracking-wide mb-1">Total Mes</p>
+                      <p className="text-xl font-bold tracking-tight">{stats.total}</p>
+                    </div>
+                    <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-pure-gray-800">
+                      <p className="text-pure-gray-400 text-xs tracking-wide mb-1">Aprobados</p>
+                      <p className="text-xl font-bold tracking-tight text-emerald-400">{stats.approved}</p>
+                    </div>
+                    <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-pure-gray-800">
+                      <p className="text-pure-gray-400 text-xs tracking-wide mb-1">Pendientes</p>
+                      <p className="text-xl font-bold tracking-tight text-yellow-400">{stats.pending}</p>
+                    </div>
+                    <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-pure-gray-800">
+                      <p className="text-pure-gray-400 text-xs tracking-wide mb-1">Ingresos</p>
+                      <p className="text-xl font-bold tracking-tight">S/ {stats.revenue.toFixed(0)}</p>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+
+            {/* Full Calendar */}
+            <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+              {/* Calendar Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                  <Calendar size={18} className="text-emerald-400" />
+                  {currentMonth.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })}
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handlePrevMonth}
+                    className="p-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 rounded-lg transition-all"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    onClick={handleNextMonth}
+                    className="p-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 rounded-lg transition-all"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Weekday Headers */}
+              <div className="grid grid-cols-7 gap-2 mb-2">
+                {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
+                  <div key={day} className="text-center text-xs text-pure-gray-400 py-2 font-medium">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-2">
+                {getMonthlyOrders().map((dayData, index) => (
+                  <div key={index}>
+                    {dayData === null ? (
+                      <div className="aspect-square" />
+                    ) : (
+                      <button
+                        onClick={() => handleDayClick(dayData)}
+                        className={`w-full aspect-square rounded-lg p-2 flex flex-col items-center justify-center transition-all ${
+                          dayData.orders.length > 0
+                            ? 'bg-pure-gray-800/50 hover:bg-pure-gray-800 cursor-pointer'
+                            : 'bg-pure-gray-900/30'
+                        }`}
+                      >
+                        <span className={`text-sm font-medium ${
+                          dayData.orders.length > 0 ? 'text-pure-white' : 'text-pure-gray-500'
+                        }`}>
+                          {dayData.date.getDate()}
+                        </span>
+                        {dayData.orders.length > 0 && (
+                          <div className="mt-1 text-center">
+                            <span className="text-xs text-emerald-400 font-medium">
+                              {dayData.orders.length}
+                            </span>
+                            <span className="text-xs text-pure-gray-400 block">
+                              S/ {dayData.total.toFixed(0)}
+                            </span>
+                          </div>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Weekly View */}
             <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
               <h2 className="text-lg font-bold mb-4 tracking-tight flex items-center gap-2">
-                <Calendar size={18} className="text-emerald-400" />
-                Ventas Semanales
+                <TrendingUp size={18} className="text-emerald-400" />
+                Últimos 7 Días
               </h2>
               <div className="grid grid-cols-7 gap-2">
                 {getWeeklyOrders().map((day, index) => (
@@ -371,6 +512,9 @@ export default function AdminDashboard() {
                   >
                     <p className="text-xs text-pure-gray-400 mb-1">
                       {day.date.toLocaleDateString('es-PE', { weekday: 'short' })}
+                    </p>
+                    <p className="text-xs text-pure-gray-500 mb-1">
+                      {day.date.getDate()}
                     </p>
                     <p className="text-lg font-bold text-pure-white tracking-tight">
                       {day.orders.length}
@@ -382,37 +526,54 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Monthly View */}
-            <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
-              <h2 className="text-lg font-bold mb-4 tracking-tight flex items-center gap-2">
-                <TrendingUp size={18} className="text-emerald-400" />
-                Ventas Mensuales
-              </h2>
-              <div className="grid grid-cols-7 gap-2">
-                {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-                  <div key={day} className="text-center text-xs text-pure-gray-400 py-2">
-                    {day}
-                  </div>
-                ))}
-                {getMonthlyOrders().map((day, index) => (
+        {/* Day Details Modal */}
+        {showDayDetails && selectedDate && (
+          <div className="fixed inset-0 bg-pure-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-pure-gray-900 rounded-xl border border-pure-gray-800 w-full max-w-2xl max-h-[80vh] overflow-auto">
+              <div className="p-6 border-b border-pure-gray-800 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight">
+                    {selectedDate.date.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </h3>
+                  <p className="text-pure-gray-400 text-sm mt-1">
+                    {selectedDate.orders.length} pedidos · S/ {selectedDate.total.toFixed(2)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowDayDetails(false)}
+                  className="p-2 hover:bg-pure-gray-800 rounded-lg transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-3">
+                {selectedDate.orders.map((order) => (
                   <div
-                    key={index}
-                    className="bg-pure-gray-800/50 rounded-lg p-2 text-center hover:bg-pure-gray-800 transition-all cursor-pointer"
+                    key={order.id}
+                    className="bg-pure-gray-800/50 rounded-lg p-4 border border-pure-gray-800"
                   >
-                    <p className="text-xs text-pure-white mb-1">
-                      {day.date.getDate()}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        order.status === 'pending'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : order.status === 'approved'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {order.status === 'pending' ? 'Pendiente' : 
+                         order.status === 'approved' ? 'Aprobado' : 'Rechazado'}
+                      </span>
+                      <span className="text-pure-gray-400 text-xs">
+                        {new Date(order.created_at).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="font-medium text-sm">{order.customer_email || 'Cliente sin email'}</p>
+                    <p className="text-pure-gray-400 text-sm">
+                      {order.items?.length || 0} productos · S/ {(order.total_price || 0).toFixed(2)}
                     </p>
-                    {day.orders.length > 0 && (
-                      <>
-                        <p className="text-xs text-emerald-400">
-                          {day.orders.length}
-                        </p>
-                        <p className="text-xs text-pure-gray-400">
-                          S/ {day.total.toFixed(0)}
-                        </p>
-                      </>
-                    )}
                   </div>
                 ))}
               </div>
