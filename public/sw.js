@@ -19,25 +19,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cachear la respuesta exitosa
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
         return response;
       })
       .catch(() => {
-        // Si falla la red, buscar en cache
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Si no está en cache, retornar error simple
-          return new Response('Network error', { 
-            status: 408, 
-            statusText: 'Network error' 
-          });
-        });
+        return caches.match(event.request);
       })
   );
 });

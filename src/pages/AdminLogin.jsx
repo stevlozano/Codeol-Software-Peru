@@ -34,35 +34,52 @@ export default function AdminLogin() {
     checkSession()
     checkAdminExists()
     
+    // Check if app is already installed
+    const checkInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+          window.navigator.standalone === true
+      if (isStandalone) {
+        console.log('App is already installed (standalone mode)')
+        setIsInstalled(true)
+      }
+      return isStandalone
+    }
+    
+    // If already in standalone mode, don't try to install
+    if (checkInstalled()) return
+    
     // Listen for PWA install prompt
     const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt event fired!')
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Store the event for later use
       setDeferredPrompt(e)
       setIsInstallable(true)
+      console.log('App is installable - button should show')
     }
     
-    // Check if app is already installed
-    const checkInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches || 
-          window.navigator.standalone === true) {
-        setIsInstalled(true)
-      }
+    // Check if we already captured the event globally (it fires early)
+    if (window.deferredInstallPrompt) {
+      console.log('Using globally captured install prompt')
+      setDeferredPrompt(window.deferredInstallPrompt)
+      setIsInstallable(true)
     }
     
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    checkInstalled()
     
     // Listen for app installed event
-    window.addEventListener('appinstalled', () => {
+    const handleAppInstalled = () => {
+      console.log('App was installed!')
       setIsInstalled(true)
       setIsInstallable(false)
       setDeferredPrompt(null)
-    })
+    }
+    window.addEventListener('appinstalled', handleAppInstalled)
     
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
     }
   }, [navigate])
 
