@@ -20,7 +20,13 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Users,
+  Gift,
+  Tag,
+  Plus,
+  Crown,
+  Medal
 } from 'lucide-react'
 
 // Configuración simple de autenticación
@@ -57,6 +63,56 @@ const deleteOrder = (orderId) => {
   const orders = getOrders()
   const filtered = orders.filter(o => o.id !== orderId)
   localStorage.setItem('codeol-orders', JSON.stringify(filtered))
+}
+
+// Funciones para clientes
+const getCustomers = () => {
+  const saved = localStorage.getItem('codeol-customers')
+  return saved ? JSON.parse(saved) : []
+}
+
+const getCustomerStats = (email) => {
+  const orders = getOrders()
+  const customerOrders = orders.filter(o => 
+    o.customer?.email === email && o.status === 'approved'
+  )
+  return {
+    totalOrders: customerOrders.length,
+    totalSpent: customerOrders.reduce((sum, o) => sum + ((o.totalPrice || 0) * 1.18), 0)
+  }
+}
+
+// Funciones para promociones
+const getPromotions = () => {
+  const saved = localStorage.getItem('codeol-promotions')
+  return saved ? JSON.parse(saved) : []
+}
+
+const savePromotion = (promotion) => {
+  const promotions = getPromotions()
+  const newPromo = {
+    ...promotion,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+    isActive: true
+  }
+  promotions.unshift(newPromo)
+  localStorage.setItem('codeol-promotions', JSON.stringify(promotions))
+  return newPromo
+}
+
+const deletePromotion = (promoId) => {
+  const promotions = getPromotions()
+  const filtered = promotions.filter(p => p.id !== promoId)
+  localStorage.setItem('codeol-promotions', JSON.stringify(filtered))
+}
+
+const togglePromotionStatus = (promoId) => {
+  const promotions = getPromotions()
+  const updated = promotions.map(p => 
+    p.id === promoId ? { ...p, isActive: !p.isActive } : p
+  )
+  localStorage.setItem('codeol-promotions', JSON.stringify(updated))
 }
 
 // Generar PDF con estilo minimalista
@@ -256,9 +312,25 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeView, setActiveView] = useState('orders') // 'orders' | 'calendar'
+  const [activeView, setActiveView] = useState('orders') // 'orders' | 'calendar' | 'customers' | 'promotions'
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const previousOrdersRef = useRef([])
+  
+  // Estados para clientes
+  const [customers, setCustomers] = useState([])
+  const [customerSearch, setCustomerSearch] = useState('')
+  
+  // Estados para promociones
+  const [promotions, setPromotions] = useState([])
+  const [showPromoForm, setShowPromoForm] = useState(false)
+  const [promoFormData, setPromoFormData] = useState({
+    title: '',
+    description: '',
+    discountPercent: '',
+    minPurchase: '',
+    validUntil: '',
+    code: ''
+  })
 
   // Verificar autenticación
   useEffect(() => {
@@ -306,6 +378,69 @@ export default function AdminDashboard() {
 
     return () => clearInterval(interval)
   }, [isAuthenticated, notificationsEnabled])
+
+  // Cargar clientes y promociones
+  useEffect(() => {
+    if (!isAuthenticated) return
+    
+    const loadData = () => {
+      // Cargar clientes con estadísticas
+      const allCustomers = getCustomers()
+      const customersWithStats = allCustomers.map(c => ({
+        ...c,
+        stats: getCustomerStats(c.email)
+      })).sort((a, b) => b.stats.totalSpent - a.stats.totalSpent)
+      setCustomers(customersWithStats)
+      
+      // Cargar promociones
+      setPromotions(getPromotions())
+    }
+    
+    loadData()
+    const interval = setInterval(loadData, 5000) // Actualizar cada 5 segundos
+    return () => clearInterval(interval)
+  }, [isAuthenticated])
+
+  // Manejar formulario de promociones
+  const handlePromoSubmit = (e) => {
+    e.preventDefault()
+    
+    if (!promoFormData.title || !promoFormData.discountPercent || !promoFormData.code) {
+      alert('Por favor completa los campos obligatorios')
+      return
+    }
+    
+    savePromotion({
+      ...promoFormData,
+      discountPercent: parseInt(promoFormData.discountPercent),
+      minPurchase: parseFloat(promoFormData.minPurchase) || 0
+    })
+    
+    setPromotions(getPromotions())
+    setShowPromoForm(false)
+    setPromoFormData({
+      title: '',
+      description: '',
+      discountPercent: '',
+      minPurchase: '',
+      validUntil: '',
+      code: ''
+    })
+    
+    alert('¡Promoción creada exitosamente!')
+  }
+
+  const handleDeletePromo = (promoId) => {
+    if (confirm('¿Estás seguro de eliminar esta promoción?')) {
+      deletePromotion(promoId)
+      setPromotions(getPromotions())
+    }
+  }
+
+  const handleTogglePromo = (promoId) => {
+    togglePromotionStatus(promoId)
+    setPromotions(getPromotions())
+  }
 
   // Toggle notificaciones (activar/desactivar)
   const toggleNotifications = async () => {
@@ -542,8 +677,8 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Toggle Orders/Calendar */}
-              <div className="flex items-center bg-pure-gray-800 rounded-full p-1">
+              {/* Toggle Views */}
+              <div className="flex items-center bg-pure-gray-800 rounded-full p-1 flex-wrap gap-1">
                 <button
                   onClick={() => setActiveView('orders')}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors ${
@@ -565,6 +700,28 @@ export default function AdminDashboard() {
                 >
                   <Calendar size={14} />
                   <span className="hidden sm:inline">Calendario</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('customers')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    activeView === 'customers' 
+                      ? 'bg-pure-white text-pure-black' 
+                      : 'text-pure-gray-400 hover:text-pure-white'
+                  }`}
+                >
+                  <Users size={14} />
+                  <span className="hidden sm:inline">Clientes</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('promotions')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    activeView === 'promotions' 
+                      ? 'bg-pure-white text-pure-black' 
+                      : 'text-pure-gray-400 hover:text-pure-white'
+                  }`}
+                >
+                  <Gift size={14} />
+                  <span className="hidden sm:inline">Promos</span>
                 </button>
               </div>
 
@@ -981,6 +1138,346 @@ export default function AdminDashboard() {
                   </div>
                 )
               })()}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Vista de Clientes */}
+        {activeView === 'customers' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Stats de clientes */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <Users size={20} className="text-blue-500" />
+                  </div>
+                  <span className="text-2xl font-bold">{customers.length}</span>
+                </div>
+                <p className="text-xs text-pure-gray-500">Total clientes</p>
+              </div>
+
+              <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <Crown size={20} className="text-emerald-500" />
+                  </div>
+                  <span className="text-2xl font-bold">
+                    {customers.filter(c => c.stats.totalOrders >= 6).length}
+                  </span>
+                </div>
+                <p className="text-xs text-pure-gray-500">Clientes Oro</p>
+              </div>
+
+              <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <Medal size={20} className="text-purple-500" />
+                  </div>
+                  <span className="text-2xl font-bold">
+                    {customers.filter(c => c.stats.totalOrders >= 2 && c.stats.totalOrders < 6).length}
+                  </span>
+                </div>
+                <p className="text-xs text-pure-gray-500">Clientes Plata</p>
+              </div>
+
+              <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                    <TrendingUp size={20} className="text-yellow-500" />
+                  </div>
+                  <span className="text-2xl font-bold">
+                    S/ {customers.reduce((sum, c) => sum + c.stats.totalSpent, 0).toFixed(0)}
+                  </span>
+                </div>
+                <p className="text-xs text-pure-gray-500">Total facturado</p>
+              </div>
+            </div>
+
+            {/* Top 5 clientes más fieles */}
+            <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Crown size={20} className="text-yellow-500" />
+                Top 5 Clientes más Fieles
+              </h3>
+              
+              {customers.slice(0, 5).map((customer, index) => (
+                <div key={customer.id} className="flex items-center justify-between p-4 bg-pure-gray-800/50 rounded-xl mb-3">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
+                      index === 1 ? 'bg-gray-400/20 text-gray-400' :
+                      index === 2 ? 'bg-orange-600/20 text-orange-600' :
+                      'bg-pure-gray-700 text-pure-gray-400'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{customer.nombre}</p>
+                      <p className="text-xs text-pure-gray-500">{customer.email}</p>
+                      <p className="text-xs text-pure-gray-400">
+                        {customer.stats.totalOrders} compras • 
+                        <span className={
+                          customer.stats.totalOrders >= 6 ? 'text-yellow-500' :
+                          customer.stats.totalOrders >= 2 ? 'text-gray-400' : 'text-orange-600'
+                        }>
+                          {customer.stats.totalOrders >= 6 ? 'Oro' : 
+                           customer.stats.totalOrders >= 2 ? 'Plata' : 'Bronce'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-emerald-400">
+                      S/ {customer.stats.totalSpent.toFixed(0)}
+                    </p>
+                    <p className="text-xs text-pure-gray-500">Total gastado</p>
+                  </div>
+                </div>
+              ))}
+
+              {customers.length === 0 && (
+                <div className="text-center py-8">
+                  <Users size={48} className="mx-auto text-pure-gray-600 mb-4" />
+                  <p className="text-pure-gray-400">Aún no hay clientes registrados</p>
+                </div>
+              )}
+            </div>
+
+            {/* Lista completa de clientes */}
+            <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Todos los Clientes</h3>
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="pl-9 pr-4 py-2 bg-pure-black border border-pure-gray-700 rounded-lg text-sm focus:outline-none focus:border-pure-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {customers
+                  .filter(c => 
+                    c.nombre.toLowerCase().includes(customerSearch.toLowerCase()) ||
+                    c.email.toLowerCase().includes(customerSearch.toLowerCase())
+                  )
+                  .map(customer => (
+                    <div key={customer.id} className="flex items-center justify-between p-3 bg-pure-gray-800/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-pure-gray-700 rounded-full flex items-center justify-center">
+                          <User size={18} className="text-pure-gray-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{customer.nombre}</p>
+                          <p className="text-xs text-pure-gray-500">{customer.email}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold">{customer.stats.totalOrders} compras</p>
+                        <p className="text-xs text-emerald-400">S/ {customer.stats.totalSpent.toFixed(0)}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Vista de Promociones */}
+        {activeView === 'promotions' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Botón crear promoción */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Promociones</h2>
+              <button
+                onClick={() => setShowPromoForm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-pure-white text-pure-black rounded-lg hover:bg-pure-gray-200 transition-colors"
+              >
+                <Plus size={18} />
+                Crear Promoción
+              </button>
+            </div>
+
+            {/* Formulario de promoción */}
+            {showPromoForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-6"
+              >
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Tag size={20} />
+                  Nueva Promoción
+                </h3>
+                
+                <form onSubmit={handlePromoSubmit} className="space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Nombre de la promoción *"
+                      value={promoFormData.title}
+                      onChange={(e) => setPromoFormData({...promoFormData, title: e.target.value})}
+                      className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Código de descuento * (ej: VERANO20)"
+                      value={promoFormData.code}
+                      onChange={(e) => setPromoFormData({...promoFormData, code: e.target.value.toUpperCase()})}
+                      className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white"
+                      required
+                    />
+                  </div>
+
+                  <textarea
+                    placeholder="Descripción de la promoción"
+                    value={promoFormData.description}
+                    onChange={(e) => setPromoFormData({...promoFormData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white h-20 resize-none"
+                  />
+
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-pure-gray-500 mb-1">% Descuento *</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        placeholder="20"
+                        value={promoFormData.discountPercent}
+                        onChange={(e) => setPromoFormData({...promoFormData, discountPercent: e.target.value})}
+                        className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-pure-gray-500 mb-1">Compra mínima (S/)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={promoFormData.minPurchase}
+                        onChange={(e) => setPromoFormData({...promoFormData, minPurchase: e.target.value})}
+                        className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-pure-gray-500 mb-1">Válido hasta</label>
+                      <input
+                        type="date"
+                        value={promoFormData.validUntil}
+                        onChange={(e) => setPromoFormData({...promoFormData, validUntil: e.target.value})}
+                        className="w-full px-4 py-3 bg-pure-black border border-pure-gray-700 rounded-lg focus:outline-none focus:border-pure-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="flex-1 py-3 bg-pure-white text-pure-black font-semibold rounded-lg hover:bg-pure-gray-200 transition-colors"
+                    >
+                      Crear Promoción
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPromoForm(false)}
+                      className="px-6 py-3 bg-pure-gray-800 rounded-lg hover:bg-pure-gray-700 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+
+            {/* Lista de promociones */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {promotions.map(promo => (
+                <div 
+                  key={promo.id} 
+                  className={`p-4 rounded-xl border transition-all ${
+                    promo.isActive 
+                      ? 'bg-pure-gray-900/50 border-pure-gray-800' 
+                      : 'bg-pure-gray-900/30 border-pure-gray-800/50 opacity-60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Gift size={20} className={promo.isActive ? 'text-emerald-500' : 'text-pure-gray-500'} />
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        promo.isActive 
+                          ? 'bg-emerald-500/20 text-emerald-500' 
+                          : 'bg-pure-gray-700 text-pure-gray-400'
+                      }`}>
+                        {promo.isActive ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleTogglePromo(promo.id)}
+                        className="p-1.5 hover:bg-pure-gray-800 rounded transition-colors"
+                        title={promo.isActive ? 'Desactivar' : 'Activar'}
+                      >
+                        {promo.isActive ? <X size={16} /> : <CheckCircle size={16} className="text-emerald-500" />}
+                      </button>
+                      <button
+                        onClick={() => handleDeletePromo(promo.id)}
+                        className="p-1.5 hover:bg-red-500/10 hover:text-red-500 rounded transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <h3 className="font-semibold text-lg mb-1">{promo.title}</h3>
+                  <p className="text-sm text-pure-gray-400 mb-3">{promo.description}</p>
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <code className="px-3 py-1.5 bg-pure-black rounded-lg font-mono text-emerald-400">
+                      {promo.code}
+                    </code>
+                    <span className="text-2xl font-bold text-emerald-500">
+                      {promo.discountPercent}%
+                    </span>
+                    <span className="text-sm text-pure-gray-500">OFF</span>
+                  </div>
+
+                  <div className="text-xs text-pure-gray-500 space-y-1">
+                    {promo.minPurchase > 0 && (
+                      <p>Compra mínima: S/ {promo.minPurchase}</p>
+                    )}
+                    {promo.validUntil && (
+                      <p>Válida hasta: {new Date(promo.validUntil).toLocaleDateString('es-PE')}</p>
+                    )}
+                    <p>Creada: {new Date(promo.createdAt).toLocaleDateString('es-PE')}</p>
+                  </div>
+                </div>
+              ))}
+
+              {promotions.length === 0 && (
+                <div className="col-span-full text-center py-12 bg-pure-gray-900/30 border border-pure-gray-800/50 rounded-xl">
+                  <Gift size={48} className="mx-auto text-pure-gray-600 mb-4" />
+                  <p className="text-pure-gray-400">No hay promociones creadas</p>
+                  <p className="text-sm text-pure-gray-500 mt-1">Crea tu primera promoción con el botón de arriba</p>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
