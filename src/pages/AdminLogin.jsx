@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Shield, Lock, UserPlus, LogIn, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Shield, Lock, UserPlus, LogIn, Eye, EyeOff, ArrowLeft, Download, Smartphone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
@@ -11,6 +11,11 @@ export default function AdminLogin() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [hasAdmin, setHasAdmin] = useState(false)
+  
+  // PWA Install state
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [isInstallable, setIsInstallable] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(false)
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -28,6 +33,37 @@ export default function AdminLogin() {
   useEffect(() => {
     checkSession()
     checkAdminExists()
+    
+    // Listen for PWA install prompt
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault()
+      // Store the event for later use
+      setDeferredPrompt(e)
+      setIsInstallable(true)
+    }
+    
+    // Check if app is already installed
+    const checkInstalled = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches || 
+          window.navigator.standalone === true) {
+        setIsInstalled(true)
+      }
+    }
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    checkInstalled()
+    
+    // Listen for app installed event
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true)
+      setIsInstallable(false)
+      setDeferredPrompt(null)
+    })
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    }
   }, [navigate])
 
   const checkSession = async () => {
@@ -168,6 +204,28 @@ export default function AdminLogin() {
     }
   }
 
+  // Handle PWA install
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return
+    
+    // Show the install prompt
+    deferredPrompt.prompt()
+    
+    // Wait for user response
+    const { outcome } = await deferredPrompt.userChoice
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt')
+      setIsInstalled(true)
+    } else {
+      console.log('User dismissed the install prompt')
+    }
+    
+    // Clear the prompt
+    setDeferredPrompt(null)
+    setIsInstallable(false)
+  }
+
   return (
     <div className="min-h-screen bg-pure-black text-pure-white flex items-center justify-center p-4">
       {/* Background pattern */}
@@ -212,6 +270,46 @@ export default function AdminLogin() {
 
           {/* Form */}
           <div className="p-8">
+            {/* PWA Install Button - Solo mostrar si es instalable y no está instalada */}
+            {isInstallable && !isInstalled && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Smartphone size={20} className="text-emerald-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-emerald-400 mb-1">
+                      Descarga la app
+                    </p>
+                    <p className="text-xs text-pure-gray-400 mb-3">
+                      Instala CODEOL Admin como una aplicación real en tu dispositivo para acceso rápido sin necesidad de navegador.
+                    </p>
+                    <button
+                      onClick={handleInstallClick}
+                      className="w-full py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/50 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    >
+                      <Download size={16} />
+                      Instalar aplicación
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Show if already installed */}
+            {isInstalled && (
+              <div className="mb-6 p-3 bg-pure-gray-800/50 rounded-lg flex items-center gap-2">
+                <Smartphone size={16} className="text-pure-gray-400" />
+                <p className="text-sm text-pure-gray-400">
+                  App instalada - Modo standalone activo
+                </p>
+              </div>
+            )}
+
             {/* Tabs */}
             <div className="flex mb-6 bg-pure-gray-800 rounded-xl p-1">
               <button

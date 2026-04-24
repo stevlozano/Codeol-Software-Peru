@@ -1,0 +1,22 @@
+{
+  "name": "CODEOL Software Perú - Admin",
+  "short_name": "CODEOL Admin",
+  "description": "Panel de administración para CODEOL Software Perú",
+  "start_url": "/admin-login",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "72x72 96x96 128x128 144x144 152x152 192x192 384x384 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "es-PE",
+  "dir": "ltr"
+}

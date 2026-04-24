@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/images/logooriginal.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CODEOL Admin" />
     <title>Codeol Software Perú | Desarrollo Web y Sistemas Personalizados</title>
     <meta name="description" content="Codeol Software Perú - Especialistas en páginas web modernas y sistemas personalizados. 5 años de experiencia, 250+ clientes satisfechos." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,5 +18,19 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((error) => {
+              console.log('SW registration failed: ', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
