@@ -77,19 +77,13 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated])
 
-  const handleInstallPWA = async () => {
-    if (!installPrompt) {
-      // For iOS or if no prompt, show manual instructions
-      alert('Para instalar:\n1. Toca el botón compartir (iOS) o menú (Android)\n2. Selecciona "Agregar a pantalla de inicio"')
-      return
-    }
+  const handleInstallPWA = () => {
+    // Open the admin.html page which is a separate installable PWA
+    const installWindow = window.open('/admin.html', '_blank', 'width=400,height=700')
     
-    installPrompt.prompt()
-    const { outcome } = await installPrompt.userChoice
-    
-    if (outcome === 'accepted') {
-      setIsPWAInstalled(true)
-      setInstallPrompt(null)
+    if (!installWindow) {
+      // If popup blocked, redirect in same window
+      window.location.href = '/admin.html'
     }
   }
 

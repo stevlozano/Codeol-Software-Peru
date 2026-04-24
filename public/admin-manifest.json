@@ -1,14 +1,15 @@
 {
-  "id": "codeol-admin",
-  "name": "CODEOL Admin Dashboard",
-  "short_name": "CODEOL Admin",
-  "description": "Panel de administración para CODEOL Software Perú",
+  "id": "codeol-admin-app",
+  "name": "CODEOL Admin",
+  "short_name": "Admin",
+  "description": "Panel de administración CODEOL - Gestión de pedidos y ventas",
   "start_url": "/admin?utm_source=pwa&utm_medium=shortcut",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
-  "orientation": "any",
-  "scope": "/",
+  "orientation": "portrait",
+  "scope": "/admin",
   "icons": [
     {
       "src": "/images/logooriginal.png",
@@ -26,5 +27,36 @@
   "categories": ["business", "productivity"],
   "lang": "es-PE",
   "dir": "ltr",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Pedidos Pendientes",
+      "short_name": "Pendientes",
+      "description": "Ver pedidos pendientes de aprobación",
+      "url": "/admin?view=orders&filter=pending",
+      "icons": [{ "src": "/images/logooriginal.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calendario de Ventas",
+      "short_name": "Calendario",
+      "description": "Ver calendario de ventas",
+      "url": "/admin?view=calendar",
+      "icons": [{ "src": "/images/logooriginal.png", "sizes": "192x192" }]
+    }
+  ],
+  "permissions": [
+    "notifications",
+    "push",
+    "background-sync",
+    "storage"
+  ],
+  "screenshots": [
+    {
+      "src": "/images/logooriginal.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard de pedidos"
+    }
+  ]
 }
