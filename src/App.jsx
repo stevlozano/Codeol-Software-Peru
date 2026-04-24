@@ -6,6 +6,7 @@ import BriefOverview from './sections/BriefOverview'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import Cart from './components/Cart'
+import PWAInstallBanner from './components/PWAInstallBanner'
 import EcommerceDemo from './pages/EcommerceDemo'
 import ERPDemo from './pages/ERPDemo'
 import FintechLandingDemo from './pages/FintechLandingDemo'
@@ -36,6 +37,7 @@ function HomePage() {
         <Stats />
         <BriefOverview />
       </main>
+      <PWAInstallBanner />
       <Footer />
       <Chatbot />
       <Cart />

@@ -1,13 +1,13 @@
 {
-  "id": "codeol-admin-app",
-  "name": "CODEOL Software Perú - Admin",
-  "short_name": "CODEOL Admin",
-  "description": "Panel de administración para CODEOL Software Perú",
-  "start_url": "/admin-login?utm_source=pwa&utm_medium=shortcut",
+  "id": "codeol-app",
+  "name": "CODEOL Software Perú",
+  "short_name": "CODEOL",
+  "description": "Desarrollo Web y Sistemas Personalizados",
+  "start_url": "/?utm_source=pwa&utm_medium=shortcut",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "portrait",
+  "orientation": "any",
   "scope": "/",
   "icons": [
     {
