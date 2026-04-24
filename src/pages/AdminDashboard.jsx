@@ -73,12 +73,13 @@ const generateOrderPDF = (order) => {
   doc.setFillColor(...darkGray)
   doc.rect(0, 0, 210, 45, 'F')
   
-  // Logo/Nombre empresa en blanco
+  // Logo placeholder - Agregar: doc.addImage(logoBase64, 'PNG', 15, 10, 25, 25)
+  // Por ahora usamos texto estilizado como logo
   doc.setTextColor(255, 255, 255)
-  doc.setFontSize(24)
+  doc.setFontSize(22)
   doc.setFont('helvetica', 'bold')
-  doc.text('CODEOL', 20, 25)
-  doc.setFontSize(10)
+  doc.text('◆ CODEOL', 20, 24)
+  doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
   doc.text('SOFTWARE PERÚ', 20, 32)
   
@@ -215,7 +216,7 @@ const generateOrderPDF = (order) => {
   doc.setTextColor(150, 150, 150)
   doc.setFontSize(8)
   doc.setFont('helvetica', 'normal')
-  doc.text('codeolsoftware@gmail.com  |  +51 916 895 252  |  codeol.vercel.app', 105, 290, { align: 'center' })
+  doc.text('codeolsoftware@gmail.com  |  +51 916 895 252  |  [TU-WEB-OFICIAL.COM]', 105, 290, { align: 'center' })
   doc.setFontSize(7)
   doc.text('Gracias por confiar en nosotros', 105, 294, { align: 'center' })
   
