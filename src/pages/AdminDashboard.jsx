@@ -8,9 +8,7 @@ import {
   Check, 
   Clock, 
   X,
-  TrendingUp,
-  DollarSign,
-  Users
+  TrendingUp
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -171,103 +169,75 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return <div className="min-h-screen bg-pure-black flex items-center justify-center">
-      <div className="text-pure-white">Cargando...</div>
+      <div className="text-pure-white text-sm tracking-wide">Cargando...</div>
     </div>
   }
 
   return (
-    <div className="min-h-screen bg-pure-gray-900 text-pure-white">
+    <div className="min-h-screen bg-pure-black text-pure-white">
       {/* Header */}
-      <div className="bg-pure-gray-800 border-b border-pure-gray-700 px-6 py-4">
+      <div className="border-b border-pure-gray-800 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-pure-gray-400 text-sm">Gestión de pedidos y ventas</p>
+            <h1 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h1>
+            <p className="text-pure-gray-400 text-sm tracking-wide">Gestión de pedidos</p>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 text-pure-gray-400 hover:text-pure-white rounded-lg transition-all text-sm"
           >
-            <LogOut size={18} />
-            <span>Cerrar Sesión</span>
+            <LogOut size={16} />
+            <span>Salir</span>
           </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                <DollarSign size={24} className="text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-pure-gray-400 text-sm">Ingresos Totales</p>
-                <p className="text-2xl font-bold">S/ {totalRevenue.toFixed(2)}</p>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+            <p className="text-pure-gray-400 text-xs tracking-wide mb-2">Ingresos</p>
+            <p className="text-2xl font-bold tracking-tight">S/ {totalRevenue.toFixed(2)}</p>
           </div>
 
-          <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <ShoppingBag size={24} className="text-blue-400" />
-              </div>
-              <div>
-                <p className="text-pure-gray-400 text-sm">Pedidos Totales</p>
-                <p className="text-2xl font-bold">{orders.length}</p>
-              </div>
-            </div>
+          <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+            <p className="text-pure-gray-400 text-xs tracking-wide mb-2">Pedidos</p>
+            <p className="text-2xl font-bold tracking-tight">{orders.length}</p>
           </div>
 
-          <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <Clock size={24} className="text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-pure-gray-400 text-sm">Pendientes</p>
-                <p className="text-2xl font-bold">{pendingOrders}</p>
-              </div>
-            </div>
+          <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+            <p className="text-pure-gray-400 text-xs tracking-wide mb-2">Pendientes</p>
+            <p className="text-2xl font-bold tracking-tight text-yellow-400">{pendingOrders}</p>
           </div>
 
-          <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <Check size={24} className="text-green-400" />
-              </div>
-              <div>
-                <p className="text-pure-gray-400 text-sm">Aprobados</p>
-                <p className="text-2xl font-bold">{approvedOrders}</p>
-              </div>
-            </div>
+          <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+            <p className="text-pure-gray-400 text-xs tracking-wide mb-2">Aprobados</p>
+            <p className="text-2xl font-bold tracking-tight text-emerald-400">{approvedOrders}</p>
           </div>
         </div>
 
         {/* View Toggle */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveView('orders')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
               activeView === 'orders'
-                ? 'bg-emerald-500 text-pure-white'
-                : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
             }`}
           >
-            <ShoppingBag size={18} />
+            <ShoppingBag size={16} />
             Pedidos
           </button>
           <button
             onClick={() => setActiveView('calendar')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
               activeView === 'calendar'
-                ? 'bg-emerald-500 text-pure-white'
-                : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
             }`}
           >
-            <Calendar size={18} />
+            <Calendar size={16} />
             Calendario
           </button>
         </div>
@@ -279,40 +249,40 @@ export default function AdminDashboard() {
             <div className="flex gap-2 mb-6">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
                   filter === 'all'
-                    ? 'bg-emerald-500 text-pure-white'
-                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
                 }`}
               >
                 Todos
               </button>
               <button
                 onClick={() => setFilter('pending')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
                   filter === 'pending'
-                    ? 'bg-yellow-500 text-pure-white'
-                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                    ? 'bg-yellow-500/20 text-yellow-400'
+                    : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
                 }`}
               >
                 Pendientes
               </button>
               <button
                 onClick={() => setFilter('approved')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
                   filter === 'approved'
-                    ? 'bg-green-500 text-pure-white'
-                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
                 }`}
               >
                 Aprobados
               </button>
               <button
                 onClick={() => setFilter('rejected')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-all text-sm tracking-wide ${
                   filter === 'rejected'
-                    ? 'bg-red-500 text-pure-white'
-                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                    ? 'bg-red-500/20 text-red-400'
+                    : 'bg-pure-gray-900/50 text-pure-gray-400 hover:bg-pure-gray-900'
                 }`}
               >
                 Rechazados
@@ -321,38 +291,38 @@ export default function AdminDashboard() {
 
             {/* Orders List */}
             {loading ? (
-              <div className="text-center py-12 text-pure-gray-400">Cargando pedidos...</div>
+              <div className="text-center py-12 text-pure-gray-400 text-sm">Cargando pedidos...</div>
             ) : filteredOrders.length === 0 ? (
-              <div className="text-center py-12 text-pure-gray-400">No hay pedidos</div>
+              <div className="text-center py-12 text-pure-gray-400 text-sm">No hay pedidos</div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredOrders.map((order) => (
                   <div
                     key={order.id}
-                    className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700"
+                    className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium tracking-wide ${
                             order.status === 'pending'
                               ? 'bg-yellow-500/20 text-yellow-400'
                               : order.status === 'approved'
-                              ? 'bg-green-500/20 text-green-400'
+                              ? 'bg-emerald-500/20 text-emerald-400'
                               : 'bg-red-500/20 text-red-400'
                           }`}>
                             {order.status === 'pending' ? 'Pendiente' : 
                              order.status === 'approved' ? 'Aprobado' : 'Rechazado'}
                           </span>
-                          <span className="text-pure-gray-400 text-sm">
+                          <span className="text-pure-gray-400 text-xs">
                             {new Date(order.created_at).toLocaleDateString('es-PE')}
                           </span>
                         </div>
-                        <h3 className="font-semibold mb-1">
+                        <h3 className="font-semibold mb-1 tracking-tight">
                           {order.customer_email || 'Cliente sin email'}
                         </h3>
                         <p className="text-pure-gray-400 text-sm">
-                          {order.items?.length || 0} productos - Total: S/ {(order.total_price || 0).toFixed(2)}
+                          {order.items?.length || 0} productos · S/ {(order.total_price || 0).toFixed(2)}
                         </p>
                       </div>
 
@@ -361,16 +331,16 @@ export default function AdminDashboard() {
                           <>
                             <button
                               onClick={() => updateOrderStatus(order.id, 'approved')}
-                              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-pure-white rounded-lg transition-colors"
+                              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-all text-sm tracking-wide"
                             >
-                              <Check size={18} />
+                              <Check size={16} />
                               Aceptar
                             </button>
                             <button
                               onClick={() => updateOrderStatus(order.id, 'rejected')}
-                              className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-pure-white rounded-lg transition-colors"
+                              className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all text-sm tracking-wide"
                             >
-                              <X size={18} />
+                              <X size={16} />
                               Rechazar
                             </button>
                           </>
@@ -388,21 +358,21 @@ export default function AdminDashboard() {
         {activeView === 'calendar' && (
           <div className="space-y-6">
             {/* Weekly View */}
-            <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Calendar size={24} className="text-emerald-400" />
+            <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+              <h2 className="text-lg font-bold mb-4 tracking-tight flex items-center gap-2">
+                <Calendar size={18} className="text-emerald-400" />
                 Ventas Semanales
               </h2>
               <div className="grid grid-cols-7 gap-2">
                 {getWeeklyOrders().map((day, index) => (
                   <div
                     key={index}
-                    className="bg-pure-gray-900 rounded-lg p-3 text-center"
+                    className="bg-pure-gray-800/50 rounded-lg p-3 text-center"
                   >
                     <p className="text-xs text-pure-gray-400 mb-1">
                       {day.date.toLocaleDateString('es-PE', { weekday: 'short' })}
                     </p>
-                    <p className="text-lg font-bold text-pure-white">
+                    <p className="text-lg font-bold text-pure-white tracking-tight">
                       {day.orders.length}
                     </p>
                     <p className="text-xs text-emerald-400">
@@ -414,23 +384,23 @@ export default function AdminDashboard() {
             </div>
 
             {/* Monthly View */}
-            <div className="bg-pure-gray-800 rounded-xl p-6 border border-pure-gray-700">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <TrendingUp size={24} className="text-emerald-400" />
+            <div className="bg-pure-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-pure-gray-800">
+              <h2 className="text-lg font-bold mb-4 tracking-tight flex items-center gap-2">
+                <TrendingUp size={18} className="text-emerald-400" />
                 Ventas Mensuales
               </h2>
               <div className="grid grid-cols-7 gap-2">
                 {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-                  <div key={day} className="text-center text-sm text-pure-gray-400 py-2">
+                  <div key={day} className="text-center text-xs text-pure-gray-400 py-2">
                     {day}
                   </div>
                 ))}
                 {getMonthlyOrders().map((day, index) => (
                   <div
                     key={index}
-                    className="bg-pure-gray-900 rounded-lg p-2 text-center hover:bg-pure-gray-700 transition-colors cursor-pointer"
+                    className="bg-pure-gray-800/50 rounded-lg p-2 text-center hover:bg-pure-gray-800 transition-all cursor-pointer"
                   >
-                    <p className="text-sm text-pure-white mb-1">
+                    <p className="text-xs text-pure-white mb-1">
                       {day.date.getDate()}
                     </p>
                     {day.orders.length > 0 && (
