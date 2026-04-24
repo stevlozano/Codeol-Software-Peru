@@ -47,6 +47,20 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own orders" ON orders
   FOR SELECT USING (auth.uid() = customer_id);
 
+CREATE POLICY "Admins can view all orders" ON orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM admins WHERE admins.id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Admins can update all orders" ON orders
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM admins WHERE admins.id = auth.uid()
+    )
+  );
+
 -- ============================================
 -- TABLA DE NOTIFICACIONES
 -- ============================================
@@ -116,3 +130,28 @@ CREATE TABLE IF NOT EXISTS promotions (
 
 -- No RLS needed for promotions - they're public
 -- But we can add policies if needed in the future
+
+-- ============================================
+-- TABLA DE ADMINISTRADORES
+-- ============================================
+CREATE TABLE IF NOT EXISTS admins (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nombre TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
+
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para admins
+CREATE POLICY "Allow authenticated users to view admins" ON admins
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Allow insert during admin signup" ON admins
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Admins can update own profile" ON admins
+  FOR UPDATE USING (auth.uid() = id);

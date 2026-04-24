@@ -20,6 +20,8 @@ import PricingPage from './pages/PricingPage'
 import ContactPage from './pages/ContactPage'
 import CheckoutPage from './pages/CheckoutPage'
 import OrderStatus from './pages/OrderStatus'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminLogin from './pages/AdminLogin'
 import { CartProvider } from './context/CartContext'
 import { CustomerAuthProvider } from './context/CustomerAuthContext'
 import CustomerDashboard from './pages/CustomerDashboard'
@@ -58,6 +60,8 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-status" element={<OrderStatus />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/mi-cuenta" element={<CustomerDashboard />} />
           <Route path="/login" element={<CustomerLogin />} />
           <Route path="/migrate" element={<MigrateToSupabase />} />
