@@ -26,7 +26,6 @@ import CustomerDashboard from './pages/CustomerDashboard'
 import CustomerLogin from './pages/CustomerLogin'
 import MigrateToSupabase from './components/MigrateToSupabase'
 import SupabaseDebug from './components/SupabaseDebug'
-import FamilyWelcomeModal from './components/FamilyWelcomeModal'
 
 function HomePage() {
   return (
@@ -41,7 +40,6 @@ function HomePage() {
       <Footer />
       <Chatbot />
       <Cart />
-      <FamilyWelcomeModal />
     </div>
   )
 }
