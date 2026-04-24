@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { 
@@ -32,12 +32,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAuth()
+  }, [])
+
+  useEffect(() => {
     if (isAuthenticated) {
+      console.log('Admin authenticated, loading data...')
       loadOrders()
       loadNotifications()
       subscribeToNotifications()
     }
-  }, [isAuthenticated, filter])
+  }, [isAuthenticated])
 
   const checkAuth = async () => {
     if (!isSupabaseConfigured()) return
@@ -63,23 +67,33 @@ export default function AdminDashboard() {
   const loadOrders = async () => {
     setLoading(true)
     try {
+      console.log('Loading orders from Supabase...')
       const { data, error } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false })
       
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
       
-      // Fallback to localStorage if Supabase fails
+      console.log('Orders loaded:', data?.length || 0)
+      
+      // Fallback to localStorage if Supabase fails or returns empty
       if (!data || data.length === 0) {
+        console.log('No orders from Supabase, trying localStorage...')
         const localOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
+        console.log('Local orders:', localOrders.length)
         setOrders(localOrders)
       } else {
         setOrders(data)
       }
     } catch (err) {
       console.error('Error loading orders:', err)
+      // Fallback to localStorage
       const localOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
+      console.log('Fallback to localStorage:', localOrders.length)
       setOrders(localOrders)
     } finally {
       setLoading(false)
@@ -486,11 +500,23 @@ export default function AdminDashboard() {
               </button>
             </div>
 
+            {/* Orders Count Debug */}
+            <div className="mb-4 p-3 bg-pure-gray-900/30 rounded-lg text-xs text-pure-gray-500">
+              Total: {orders.length} | Filtrados: {filteredOrders.length} | Filter: {filter}
+            </div>
+
             {/* Orders List */}
             {loading ? (
               <div className="text-center py-12 text-pure-gray-400 text-sm">Cargando pedidos...</div>
             ) : filteredOrders.length === 0 ? (
-              <div className="text-center py-12 text-pure-gray-400 text-sm">No hay pedidos</div>
+              <div className="text-center py-12 text-pure-gray-400 text-sm">
+                No hay pedidos {filter !== 'all' && `con estado "${filter}"`}
+                {orders.length === 0 && (
+                  <p className="mt-2 text-pure-gray-600">
+                    No se encontraron pedidos en la base de datos ni en localStorage.
+                  </p>
+                )}
+              </div>
             ) : (
               <div className="space-y-3">
                 {filteredOrders.map((order) => (
