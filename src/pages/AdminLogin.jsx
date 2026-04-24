@@ -300,12 +300,64 @@ export default function AdminLogin() {
               </motion.div>
             )}
 
+            {/* Manual Install Instructions - Mostrar si no es instalable automáticamente */}
+            {!isInstallable && !isInstalled && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Smartphone size={20} className="text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-400 mb-1">
+                      Instala la app manualmente
+                    </p>
+                    <p className="text-xs text-pure-gray-400 mb-3">
+                      Tu navegador no muestra el botón automático. Sigue estas instrucciones:
+                    </p>
+                    
+                    {/* Android / Chrome */}
+                    <div className="mb-3 p-3 bg-pure-gray-800/50 rounded-lg">
+                      <p className="text-xs font-medium text-pure-white mb-1">📱 Android (Chrome):</p>
+                      <ol className="text-xs text-pure-gray-400 list-decimal list-inside space-y-1">
+                        <li>Toca el menú (⋮) arriba a la derecha</li>
+                        <li>Selecciona "Agregar a pantalla de inicio"</li>
+                        <li>Confirma "Agregar"</li>
+                      </ol>
+                    </div>
+                    
+                    {/* iOS / Safari */}
+                    <div className="mb-3 p-3 bg-pure-gray-800/50 rounded-lg">
+                      <p className="text-xs font-medium text-pure-white mb-1">🍎 iPhone/iPad (Safari):</p>
+                      <ol className="text-xs text-pure-gray-400 list-decimal list-inside space-y-1">
+                        <li>Toca el botón Compartir (⬆️)</li>
+                        <li>Desplaza y toca "Agregar a pantalla de inicio"</li>
+                        <li>Confirma "Agregar"</li>
+                      </ol>
+                    </div>
+                    
+                    {/* Desktop */}
+                    <div className="p-3 bg-pure-gray-800/50 rounded-lg">
+                      <p className="text-xs font-medium text-pure-white mb-1">💻 Computadora (Chrome/Edge):</p>
+                      <ol className="text-xs text-pure-gray-400 list-decimal list-inside space-y-1">
+                        <li>Mira el icono ➕ en la barra de direcciones</li>
+                        <li>O presiona Ctrl+Shift+J y busca "Install"</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Show if already installed */}
             {isInstalled && (
-              <div className="mb-6 p-3 bg-pure-gray-800/50 rounded-lg flex items-center gap-2">
-                <Smartphone size={16} className="text-pure-gray-400" />
-                <p className="text-sm text-pure-gray-400">
-                  App instalada - Modo standalone activo
+              <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center gap-2">
+                <Smartphone size={16} className="text-emerald-400" />
+                <p className="text-sm text-emerald-400">
+                  ✅ App instalada - Modo standalone activo
                 </p>
               </div>
             )}
