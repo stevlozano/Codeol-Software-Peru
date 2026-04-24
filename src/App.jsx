@@ -26,6 +26,7 @@ import { CustomerAuthProvider } from './context/CustomerAuthContext'
 import CustomerDashboard from './pages/CustomerDashboard'
 import CustomerLogin from './pages/CustomerLogin'
 import MigrateToSupabase from './components/MigrateToSupabase'
+import SupabaseDebug from './components/SupabaseDebug'
 import FamilyWelcomeModal from './components/FamilyWelcomeModal'
 
 function HomePage() {
@@ -64,6 +65,7 @@ function App() {
             <Route path="/mi-cuenta" element={<CustomerDashboard />} />
           <Route path="/login" element={<CustomerLogin />} />
           <Route path="/migrate" element={<MigrateToSupabase />} />
+          <Route path="/debug" element={<SupabaseDebug />} />
             <Route path="/demo/ecommerce-moda" element={<EcommerceDemo />} />
             <Route path="/demo/sistema-erp" element={<ERPDemo />} />
             <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />

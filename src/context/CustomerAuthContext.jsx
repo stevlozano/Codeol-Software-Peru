@@ -78,54 +78,81 @@ export function CustomerAuthProvider({ children }) {
 
   // Registro
   const register = async (userData) => {
+    console.log('Register called, Supabase configured:', isSupabaseConfigured())
+    
     // Verificar si email ya existe en Supabase
     if (isSupabaseConfigured()) {
-      const { data: existing } = await supabase
-        .from('customers')
-        .select('email')
-        .eq('email', userData.email)
-        .maybeSingle()
-      
-      if (existing) {
-        return { success: false, error: 'Este correo ya está registrado' }
+      try {
+        // Verificar si email ya existe
+        const { data: existing, error: existingError } = await supabase
+          .from('customers')
+          .select('email')
+          .eq('email', userData.email)
+          .maybeSingle()
+        
+        if (existingError) {
+          console.error('Error checking existing user:', existingError)
+        }
+        
+        if (existing) {
+          return { success: false, error: 'Este correo ya está registrado' }
+        }
+        
+        // Crear usuario en auth de Supabase
+        console.log('Creating auth user...')
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password
+        })
+        
+        if (authError) {
+          console.error('Auth error:', authError)
+          return { success: false, error: authError.message }
+        }
+        
+        if (!authData.user) {
+          console.error('No user returned from auth signup')
+          return { success: false, error: 'Error al crear usuario' }
+        }
+        
+        console.log('Auth user created:', authData.user.id)
+        
+        // Crear perfil en tabla customers
+        const newUser = {
+          id: authData.user.id,
+          nombre: userData.nombre,
+          email: userData.email,
+          telefono: userData.telefono || '',
+          password: userData.password,
+          referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          createdAt: new Date().toISOString()
+        }
+        
+        console.log('Inserting to customers table:', newUser)
+        
+        const { data: insertData, error: profileError } = await supabase
+          .from('customers')
+          .insert(newUser)
+          .select()
+        
+        if (profileError) {
+          console.error('Profile insert error:', profileError)
+          return { success: false, error: `Error al guardar perfil: ${profileError.message}` }
+        }
+        
+        console.log('User registered successfully in Supabase')
+        
+        // Iniciar sesión automáticamente
+        const { password, ...customerData } = newUser
+        setCustomer(customerData)
+        setIsLoggedIn(true)
+        localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+        
+        return { success: true }
+      } catch (err) {
+        console.error('Registration error:', err)
+        return { success: false, error: err.message || 'Error en el registro' }
       }
-      
-      // Crear usuario en auth de Supabase
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password
-      })
-      
-      if (authError) {
-        return { success: false, error: authError.message }
-      }
-      
-      // Crear perfil en tabla customers
-      const newUser = {
-        id: authData.user.id,
-        nombre: userData.nombre,
-        email: userData.email,
-        telefono: userData.telefono,
-        password: userData.password, // En producción usar hash
-        referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        createdAt: new Date().toISOString()
-      }
-      
-      const { error: profileError } = await supabase
-        .from('customers')
-        .insert(newUser)
-      
-      if (profileError) {
-        return { success: false, error: profileError.message }
-      }
-      
-      // Iniciar sesión automáticamente
-      const { password, ...customerData } = newUser
-      setCustomer(customerData)
-      setIsLoggedIn(true)
-      localStorage.setItem('codeol-customer', JSON.stringify(customerData))
-      
-      return { success: true }
     }
     
     // Fallback: localStorage
