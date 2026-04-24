@@ -624,35 +624,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Filtros y búsqueda */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-pure-gray-500" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por cliente, email o número de orden..."
-              className="w-full pl-10 pr-4 py-3 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-pure-white focus:outline-none focus:border-pure-white"
-            />
-          </div>
-          <div className="flex gap-2">
-            {['all', 'pending', 'approved', 'rejected'].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-lg text-sm capitalize transition-colors ${
-                  filter === f
-                    ? 'bg-pure-white text-pure-black'
-                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
-                }`}
-              >
-                {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendientes' : f === 'approved' ? 'Aprobadas' : 'Rechazadas'}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Vista de Órdenes */}
         {activeView === 'orders' && (
           <>
