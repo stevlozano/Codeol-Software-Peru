@@ -91,6 +91,20 @@ CREATE POLICY "Users can update own notifications" ON notifications
 CREATE POLICY "Users can delete own notifications" ON notifications
   FOR DELETE USING (auth.uid() = customer_id);
 
+CREATE POLICY "Admins can insert notifications" ON notifications
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM admins WHERE admins.id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Admins can view all notifications" ON notifications
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM admins WHERE admins.id = auth.uid()
+    )
+  );
+
 -- ============================================
 -- TABLA DE PREFERENCIAS DE CLIENTE
 -- ============================================

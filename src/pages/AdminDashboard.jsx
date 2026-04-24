@@ -10,7 +10,9 @@ import {
   X,
   TrendingUp,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bell,
+  BellRing
 } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -22,12 +24,17 @@ export default function AdminDashboard() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [showDayDetails, setShowDayDetails] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifications, setShowNotifications] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
     checkAuth()
     if (isAuthenticated) {
       loadOrders()
+      loadNotifications()
+      subscribeToNotifications()
     }
   }, [isAuthenticated, filter])
 
@@ -80,21 +87,33 @@ export default function AdminDashboard() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
+      // Get order details first
+      const order = orders.find(o => o.id === orderId)
+      
       // Update in Supabase
       const { error } = await supabase
         .from('orders')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', orderId)
-      
+    
       if (error) throw error
       
+      // Create notification for customer
+      if (order && order.customer_id) {
+        const statusText = newStatus === 'approved' ? 'aceptado' : newStatus === 'rejected' ? 'rechazado' : 'actualizado'
+        const title = newStatus === 'approved' ? '¡Pedido Aprobado!' : newStatus === 'rejected' ? 'Pedido Rechazado' : 'Estado Actualizado'
+        const message = `Tu pedido #${orderId.slice(-6)} ha sido ${statusText}. Total: S/ ${(order.total_price || 0).toFixed(2)}`
+        
+        await createNotification(order.customer_id, title, message, 'order-status')
+      }
+    
       // Also update localStorage
       const localOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
       const updatedOrders = localOrders.map(order => 
         order.id === orderId ? { ...order, status: newStatus } : order
       )
       localStorage.setItem('codeol-orders', JSON.stringify(updatedOrders))
-      
+    
       loadOrders()
     } catch (err) {
       console.error('Error updating order:', err)
@@ -111,6 +130,77 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/admin-login')
+  }
+
+  const loadNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20)
+      
+      if (error) throw error
+      
+      setNotifications(data || [])
+      setUnreadCount((data || []).filter(n => !n.read).length)
+    } catch (err) {
+      console.error('Error loading notifications:', err)
+    }
+  }
+
+  const subscribeToNotifications = () => {
+    const subscription = supabase
+      .channel('admin-notifications')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
+        (payload) => {
+          setNotifications(prev => [payload.new, ...prev])
+          setUnreadCount(prev => prev + 1)
+        }
+      )
+      .subscribe()
+    
+    return () => {
+      subscription.unsubscribe()
+    }
+  }
+
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true, read_at: new Date().toISOString() })
+        .eq('id', notificationId)
+      
+      if (error) throw error
+      
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      )
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch (err) {
+      console.error('Error marking notification as read:', err)
+    }
+  }
+
+  const createNotification = async (customerId, title, message, type = 'order-status') => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          customer_id: customerId,
+          title,
+          message,
+          type,
+          read: false,
+          created_at: new Date().toISOString()
+        })
+      
+      if (error) throw error
+    } catch (err) {
+      console.error('Error creating notification:', err)
+    }
   }
 
   const filteredOrders = orders.filter(order => {
@@ -226,13 +316,75 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h1>
             <p className="text-pure-gray-400 text-sm tracking-wide">Gestión de pedidos</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 text-pure-gray-400 hover:text-pure-white rounded-lg transition-all text-sm"
-          >
-            <LogOut size={16} />
-            <span>Salir</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="flex items-center gap-2 px-4 py-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 text-pure-gray-400 hover:text-pure-white rounded-lg transition-all text-sm relative"
+              >
+                {unreadCount > 0 ? <BellRing size={16} className="text-emerald-400" /> : <Bell size={16} />}
+                <span className="hidden sm:inline">Notificaciones</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {showNotifications && (
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-pure-gray-900 rounded-xl border border-pure-gray-800 shadow-xl z-50 max-h-96 overflow-auto">
+                  <div className="p-4 border-b border-pure-gray-800">
+                    <h3 className="font-bold text-sm">Notificaciones</h3>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-pure-gray-400 text-sm">
+                      No hay notificaciones
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-pure-gray-800">
+                      {notifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          onClick={() => markNotificationAsRead(notification.id)}
+                          className={`w-full p-4 text-left hover:bg-pure-gray-800/50 transition-all ${
+                            !notification.read ? 'bg-pure-gray-800/30' : ''
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                              !notification.read ? 'bg-emerald-400' : 'bg-pure-gray-600'
+                            }`} />
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium ${
+                                !notification.read ? 'text-pure-white' : 'text-pure-gray-400'
+                              }`}>
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-pure-gray-500 mt-1 line-clamp-2">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-pure-gray-600 mt-1">
+                                {new Date(notification.created_at).toLocaleDateString('es-PE')}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-pure-gray-800/50 hover:bg-pure-gray-800 text-pure-gray-400 hover:text-pure-white rounded-lg transition-all text-sm"
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline">Salir</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -462,33 +614,39 @@ export default function AdminDashboard() {
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {getMonthlyOrders().map((dayData, index) => (
                   <div key={index}>
                     {dayData === null ? (
-                      <div className="aspect-square" />
+                      <div className="aspect-square min-h-[40px] sm:min-h-[60px] md:min-h-[80px]" />
                     ) : (
                       <button
                         onClick={() => handleDayClick(dayData)}
-                        className={`w-full aspect-square rounded-lg p-2 flex flex-col items-center justify-center transition-all ${
+                        className={`w-full aspect-square min-h-[40px] sm:min-h-[60px] md:min-h-[80px] rounded-lg p-1 sm:p-2 flex flex-col items-center justify-center transition-all ${
                           dayData.orders.length > 0
                             ? 'bg-pure-gray-800/50 hover:bg-pure-gray-800 cursor-pointer'
                             : 'bg-pure-gray-900/30'
                         }`}
                       >
-                        <span className={`text-sm font-medium ${
+                        <span className={`text-xs sm:text-sm font-medium ${
                           dayData.orders.length > 0 ? 'text-pure-white' : 'text-pure-gray-500'
                         }`}>
                           {dayData.date.getDate()}
                         </span>
                         {dayData.orders.length > 0 && (
-                          <div className="mt-1 text-center">
-                            <span className="text-xs text-emerald-400 font-medium">
-                              {dayData.orders.length}
+                          <div className="mt-0.5 sm:mt-1 text-center hidden sm:block">
+                            <span className="text-[10px] sm:text-xs text-emerald-400 font-medium block">
+                              {dayData.orders.length} ped
                             </span>
-                            <span className="text-xs text-pure-gray-400 block">
+                            <span className="text-[10px] sm:text-xs text-pure-gray-400 block">
                               S/ {dayData.total.toFixed(0)}
                             </span>
+                          </div>
+                        )}
+                        {/* Mobile indicator */}
+                        {dayData.orders.length > 0 && (
+                          <div className="sm:hidden mt-0.5">
+                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full block"></span>
                           </div>
                         )}
                       </button>
