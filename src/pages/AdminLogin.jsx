@@ -140,7 +140,7 @@ export default function AdminLogin() {
           id: authData.user.id,
           nombre: registerData.nombre,
           email: registerData.email,
-          createdAt: new Date().toISOString()
+          created_at: new Date().toISOString()
         })
       
       if (insertError) {

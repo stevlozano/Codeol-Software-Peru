@@ -124,8 +124,8 @@ export function CustomerAuthProvider({ children }) {
           email: userData.email,
           telefono: userData.telefono || '',
           password: userData.password,
-          referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-          createdAt: new Date().toISOString()
+          referral_code: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          created_at: new Date().toISOString()
         }
         
         console.log('Inserting to customers table:', newUser)
@@ -164,8 +164,8 @@ export function CustomerAuthProvider({ children }) {
     const newUser = {
       ...userData,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+      created_at: new Date().toISOString(),
+      referral_code: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`
     }
     
     existingUsers.push(newUser)
@@ -269,7 +269,7 @@ export function CustomerAuthProvider({ children }) {
     if (!customer) return []
     const allOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
     return allOrders.filter(o => o.customer?.email === customer.email).sort((a, b) => 
-      new Date(b.createdAt) - new Date(a.createdAt)
+      new Date(b.created_at) - new Date(a.created_at)
     )
   }
 
