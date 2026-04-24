@@ -1,0 +1,173 @@
+import { createContext, useContext, useState, useEffect } from 'react'
+
+const CustomerAuthContext = createContext()
+
+// Sistema de niveles de fidelidad
+export const LOYALTY_LEVELS = {
+  BRONZE: { name: 'Bronce', discount: 0.05, minOrders: 0, color: '#CD7F32' },
+  SILVER: { name: 'Plata', discount: 0.10, minOrders: 2, color: '#C0C0C0' },
+  GOLD: { name: 'Oro', discount: 0.15, minOrders: 6, color: '#FFD700' }
+}
+
+export function CustomerAuthProvider({ children }) {
+  const [customer, setCustomer] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loyaltyLevel, setLoyaltyLevel] = useState(LOYALTY_LEVELS.BRONZE)
+  const [totalOrders, setTotalOrders] = useState(0)
+  const [totalSpent, setTotalSpent] = useState(0)
+
+  // Cargar sesión al iniciar
+  useEffect(() => {
+    const savedCustomer = localStorage.getItem('codeol-customer')
+    if (savedCustomer) {
+      const parsed = JSON.parse(savedCustomer)
+      setCustomer(parsed)
+      setIsLoggedIn(true)
+      updateLoyaltyStats(parsed.email)
+    }
+  }, [])
+
+  // Actualizar estadísticas de fidelidad
+  const updateLoyaltyStats = (email) => {
+    const allOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
+    const customerOrders = allOrders.filter(o => 
+      o.customer?.email === email && o.status === 'approved'
+    )
+    
+    const orderCount = customerOrders.length
+    const spent = customerOrders.reduce((sum, o) => sum + ((o.totalPrice || 0) * 1.18), 0)
+    
+    setTotalOrders(orderCount)
+    setTotalSpent(spent)
+    
+    // Calcular nivel
+    if (orderCount >= LOYALTY_LEVELS.GOLD.minOrders || spent >= 3000) {
+      setLoyaltyLevel(LOYALTY_LEVELS.GOLD)
+    } else if (orderCount >= LOYALTY_LEVELS.SILVER.minOrders) {
+      setLoyaltyLevel(LOYALTY_LEVELS.SILVER)
+    } else {
+      setLoyaltyLevel(LOYALTY_LEVELS.BRONZE)
+    }
+  }
+
+  // Registro
+  const register = (userData) => {
+    const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
+    
+    // Verificar si email ya existe
+    if (existingUsers.find(u => u.email === userData.email)) {
+      return { success: false, error: 'Este correo ya está registrado' }
+    }
+    
+    const newUser = {
+      ...userData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    }
+    
+    existingUsers.push(newUser)
+    localStorage.setItem('codeol-customers', JSON.stringify(existingUsers))
+    
+    // Iniciar sesión automáticamente
+    const { password, ...customerData } = newUser
+    setCustomer(customerData)
+    setIsLoggedIn(true)
+    localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+    
+    return { success: true }
+  }
+
+  // Login
+  const login = (email, password) => {
+    const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
+    const user = existingUsers.find(u => u.email === email && u.password === password)
+    
+    if (!user) {
+      return { success: false, error: 'Correo o contraseña incorrectos' }
+    }
+    
+    const { password: _, ...customerData } = user
+    setCustomer(customerData)
+    setIsLoggedIn(true)
+    localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+    updateLoyaltyStats(email)
+    
+    return { success: true }
+  }
+
+  // Logout
+  const logout = () => {
+    setCustomer(null)
+    setIsLoggedIn(false)
+    setLoyaltyLevel(LOYALTY_LEVELS.BRONZE)
+    setTotalOrders(0)
+    setTotalSpent(0)
+    localStorage.removeItem('codeol-customer')
+  }
+
+  // Actualizar perfil
+  const updateProfile = (updates) => {
+    const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
+    const updatedUsers = existingUsers.map(u => 
+      u.id === customer.id ? { ...u, ...updates } : u
+    )
+    localStorage.setItem('codeol-customers', JSON.stringify(updatedUsers))
+    
+    const { password, ...customerData } = updatedUsers.find(u => u.id === customer.id)
+    setCustomer(customerData)
+    localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+  }
+
+  // Obtener historial de compras
+  const getOrderHistory = () => {
+    if (!customer) return []
+    const allOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
+    return allOrders.filter(o => o.customer?.email === customer.email).sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    )
+  }
+
+  // Calcular descuento aplicable a un monto
+  const calculateDiscount = (amount) => {
+    return amount * loyaltyLevel.discount
+  }
+
+  // Obtener progreso al siguiente nivel
+  const getNextLevelProgress = () => {
+    if (loyaltyLevel.name === 'Oro') return null
+    
+    const nextLevel = loyaltyLevel.name === 'Bronce' ? LOYALTY_LEVELS.SILVER : LOYALTY_LEVELS.GOLD
+    const ordersNeeded = nextLevel.minOrders - totalOrders
+    const spentNeeded = 3000 - totalSpent // Para nivel Oro por monto
+    
+    return {
+      level: nextLevel,
+      ordersNeeded: Math.max(0, ordersNeeded),
+      spentNeeded: Math.max(0, spentNeeded),
+      progressPercent: Math.min(100, (totalOrders / nextLevel.minOrders) * 100)
+    }
+  }
+
+  return (
+    <CustomerAuthContext.Provider value={{
+      customer,
+      isLoggedIn,
+      loyaltyLevel,
+      totalOrders,
+      totalSpent,
+      register,
+      login,
+      logout,
+      updateProfile,
+      getOrderHistory,
+      calculateDiscount,
+      getNextLevelProgress,
+      updateLoyaltyStats
+    }}>
+      {children}
+    </CustomerAuthContext.Provider>
+  )
+}
+
+export const useCustomerAuth = () => useContext(CustomerAuthContext)

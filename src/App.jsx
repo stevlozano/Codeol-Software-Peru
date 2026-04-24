@@ -21,6 +21,9 @@ import CheckoutPage from './pages/CheckoutPage'
 import AdminDashboard from './pages/AdminDashboard'
 import OrderStatus from './pages/OrderStatus'
 import { CartProvider } from './context/CartContext'
+import { CustomerAuthProvider } from './context/CustomerAuthContext'
+import CustomerDashboard from './pages/CustomerDashboard'
+import FamilyWelcomeModal from './components/FamilyWelcomeModal'
 
 function HomePage() {
   return (
@@ -34,33 +37,37 @@ function HomePage() {
       <Footer />
       <Chatbot />
       <Cart />
+      <FamilyWelcomeModal />
     </div>
   )
 }
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/portfolio" element={<PortfolioPage />} />
-          <Route path="/industries" element={<IndustriesPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/order-status" element={<OrderStatus />} />
-          <Route path="/demo/ecommerce-moda" element={<EcommerceDemo />} />
-          <Route path="/demo/sistema-erp" element={<ERPDemo />} />
-          <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />
-          <Route path="/demo/portal-inmobiliario" element={<RealEstateDemo />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsOfService />} />
-        </Routes>
-      </Router>
-    </CartProvider>
+    <CustomerAuthProvider>
+      <CartProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
+            <Route path="/industries" element={<IndustriesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/order-status" element={<OrderStatus />} />
+            <Route path="/mi-cuenta" element={<CustomerDashboard />} />
+            <Route path="/demo/ecommerce-moda" element={<EcommerceDemo />} />
+            <Route path="/demo/sistema-erp" element={<ERPDemo />} />
+            <Route path="/demo/landing-fintech" element={<FintechLandingDemo />} />
+            <Route path="/demo/portal-inmobiliario" element={<RealEstateDemo />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+          </Routes>
+        </Router>
+      </CartProvider>
+    </CustomerAuthProvider>
   )
 }
 
