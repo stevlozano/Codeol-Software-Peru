@@ -5,9 +5,10 @@
   "description": "Desarrollo Web y Sistemas Personalizados",
   "start_url": "/?utm_source=pwa&utm_medium=shortcut",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "any",
+  "orientation": "portrait",
   "scope": "/",
   "icons": [
     {
@@ -26,5 +27,11 @@
   "categories": ["business", "productivity"],
   "lang": "es-PE",
   "dir": "ltr",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "permissions": [
+    "notifications",
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
 }

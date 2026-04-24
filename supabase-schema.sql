@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS orders (
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
+-- Allow anyone to create orders (even without authentication)
+CREATE POLICY "Allow anyone to create orders" ON orders
+  FOR INSERT WITH CHECK (true);
+
 CREATE POLICY "Users can view own orders" ON orders
   FOR SELECT USING (auth.uid() = customer_id);
 

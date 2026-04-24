@@ -18,6 +18,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import AdminPWAInstall from '../components/AdminPWAInstall'
+import RequestPermissions from '../components/RequestPermissions'
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -836,6 +837,9 @@ export default function AdminDashboard() {
       
       {/* PWA Install Banner */}
       <AdminPWAInstall />
+      
+      {/* Request Permissions Modal */}
+      <RequestPermissions />
     </div>
   )
 }
