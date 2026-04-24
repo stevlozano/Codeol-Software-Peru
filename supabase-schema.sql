@@ -98,3 +98,26 @@ CREATE POLICY "Users can update own preferences" ON customer_preferences
 
 CREATE POLICY "Users can insert own preferences" ON customer_preferences
   FOR INSERT WITH CHECK (auth.uid() = customerId);
+
+-- ============================================
+-- TABLA DE ADMINISTRADORES
+-- ============================================
+CREATE TABLE IF NOT EXISTS admins (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nombre TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
+
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
+
+-- Solo los admins pueden ver su propio perfil
+CREATE POLICY "Admins can view own profile" ON admins
+  FOR SELECT USING (auth.uid() = id);
+
+-- Insertar solo durante registro (el trigger de auth manejará esto)
+CREATE POLICY "Allow insert during admin signup" ON admins
+  FOR INSERT WITH CHECK (auth.uid() = id);

@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Shield, Lock, UserPlus, LogIn, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
-// Admin credentials storage
-const ADMIN_STORAGE_KEY = 'codeol-admin-account'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -12,6 +10,7 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [hasAdmin, setHasAdmin] = useState(false)
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -25,43 +24,87 @@ export default function AdminLogin() {
     confirmPassword: ''
   })
 
-  // Check if already logged in
+  // Check if already logged in and if admin exists
   useEffect(() => {
-    const auth = sessionStorage.getItem('codeol-admin-auth')
-    if (auth === 'true') {
-      navigate('/admin')
-    }
+    checkSession()
+    checkAdminExists()
   }, [navigate])
 
-  // Check if admin exists
-  const adminExists = () => {
-    const admin = localStorage.getItem(ADMIN_STORAGE_KEY)
-    return !!admin
+  const checkSession = async () => {
+    if (!isSupabaseConfigured()) return
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      // Check if user is admin
+      const { data: adminData } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle()
+      
+      if (adminData) {
+        navigate('/admin')
+      }
+    }
   }
 
-  const handleLogin = (e) => {
+  const checkAdminExists = async () => {
+    if (!isSupabaseConfigured()) return
+    
+    const { count } = await supabase
+      .from('admins')
+      .select('*', { count: 'exact', head: true })
+    
+    setHasAdmin(count > 0)
+  }
+
+  const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
     
-    const admin = JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY) || '{}')
-    
-    if (!admin.email) {
-      setError('No hay cuenta de administrador registrada. Por favor regístrate primero.')
+    if (!isSupabaseConfigured()) {
+      setError('Supabase no está configurado')
       return
     }
     
-    if (admin.email !== loginData.email || admin.password !== loginData.password) {
-      setError('Correo o contraseña incorrectos')
-      return
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password
+      })
+      
+      if (authError) {
+        setError(authError.message)
+        return
+      }
+      
+      // Check if user is admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('id', data.user.id)
+        .maybeSingle()
+      
+      if (adminError || !adminData) {
+        await supabase.auth.signOut()
+        setError('Esta cuenta no tiene permisos de administrador')
+        return
+      }
+      
+      navigate('/admin')
+    } catch (err) {
+      setError('Error al iniciar sesión: ' + err.message)
     }
-    
-    sessionStorage.setItem('codeol-admin-auth', 'true')
-    navigate('/admin')
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
+    
+    if (!isSupabaseConfigured()) {
+      setError('Supabase no está configurado')
+      return
+    }
     
     if (registerData.password !== registerData.confirmPassword) {
       setError('Las contraseñas no coinciden')
@@ -73,26 +116,45 @@ export default function AdminLogin() {
       return
     }
     
-    if (adminExists()) {
+    if (hasAdmin) {
       setError('Ya existe una cuenta de administrador')
       return
     }
     
-    const adminAccount = {
-      nombre: registerData.nombre,
-      email: registerData.email,
-      password: registerData.password,
-      createdAt: new Date().toISOString()
+    try {
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: registerData.email,
+        password: registerData.password
+      })
+      
+      if (authError) {
+        setError(authError.message)
+        return
+      }
+      
+      // Create admin profile
+      const { error: insertError } = await supabase
+        .from('admins')
+        .insert({
+          id: authData.user.id,
+          nombre: registerData.nombre,
+          email: registerData.email,
+          createdAt: new Date().toISOString()
+        })
+      
+      if (insertError) {
+        setError('Error al crear perfil: ' + insertError.message)
+        return
+      }
+      
+      setSuccess('¡Cuenta creada exitosamente! Redirigiendo...')
+      setTimeout(() => {
+        navigate('/admin')
+      }, 1500)
+    } catch (err) {
+      setError('Error en el registro: ' + err.message)
     }
-    
-    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminAccount))
-    setSuccess('¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.')
-    
-    setTimeout(() => {
-      setIsLogin(true)
-      setSuccess('')
-      setLoginData({ ...loginData, email: registerData.email })
-    }, 2000)
   }
 
   return (
