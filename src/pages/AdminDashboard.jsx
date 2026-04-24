@@ -12,7 +12,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
-  BellRing
+  BellRing,
+  Download,
+  Smartphone,
+  CheckCircle
 } from 'lucide-react'
 import AdminPWAInstall from '../components/AdminPWAInstall'
 
@@ -28,10 +31,40 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [isPWAInstalled, setIsPWAInstalled] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     checkAuth()
+    
+    // Check if PWA is installed
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isIOSStandalone = window.navigator.standalone === true
+      setIsPWAInstalled(isStandalone || isIOSStandalone)
+    }
+    checkPWA()
+    
+    // Listen for install prompt
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+    }
+    
+    // Listen for app installed
+    const handleAppInstalled = () => {
+      setIsPWAInstalled(true)
+      setInstallPrompt(null)
+    }
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
   }, [])
 
   useEffect(() => {
@@ -42,6 +75,22 @@ export default function AdminDashboard() {
       subscribeToNotifications()
     }
   }, [isAuthenticated])
+
+  const handleInstallPWA = async () => {
+    if (!installPrompt) {
+      // For iOS or if no prompt, show manual instructions
+      alert('Para instalar:\n1. Toca el botón compartir (iOS) o menú (Android)\n2. Selecciona "Agregar a pantalla de inicio"')
+      return
+    }
+    
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    
+    if (outcome === 'accepted') {
+      setIsPWAInstalled(true)
+      setInstallPrompt(null)
+    }
+  }
 
   const checkAuth = async () => {
     if (!isSupabaseConfigured()) return
@@ -332,6 +381,24 @@ export default function AdminDashboard() {
             <p className="text-pure-gray-400 text-sm tracking-wide">Gestión de pedidos</p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Install PWA Button */}
+            {!isPWAInstalled && (
+              <button
+                onClick={handleInstallPWA}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-all text-sm"
+                title="Instalar aplicación"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">Instalar App</span>
+              </button>
+            )}
+            {isPWAInstalled && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm">
+                <CheckCircle size={16} />
+                <span className="hidden sm:inline">App descargada</span>
+              </div>
+            )}
+            
             {/* Notifications */}
             <div className="relative">
               <button
