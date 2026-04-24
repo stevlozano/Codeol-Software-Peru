@@ -126,6 +126,18 @@ export default function AdminLogin() {
         return
       }
       
+      // Wait for session to be established
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Get session to ensure we're authenticated
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        setError('Error: No se pudo establecer la sesión')
+        setLoading(false)
+        return
+      }
+      
       const { error: insertError } = await supabase
         .from('admins')
         .insert({
@@ -136,7 +148,8 @@ export default function AdminLogin() {
         })
       
       if (insertError) {
-        setError('Error al crear perfil de admin')
+        console.error('Insert error:', insertError)
+        setError('Error al crear perfil de admin: ' + insertError.message)
         setLoading(false)
         return
       }
@@ -144,6 +157,7 @@ export default function AdminLogin() {
       setSuccess('Admin registrado correctamente')
       setTimeout(() => navigate('/admin'), 1500)
     } catch (err) {
+      console.error('Register error:', err)
       setError('Error en el registro')
       setLoading(false)
     }
