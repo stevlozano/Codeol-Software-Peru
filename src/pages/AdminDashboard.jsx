@@ -16,7 +16,11 @@ import {
   Search,
   Filter,
   Menu,
-  X
+  X,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp
 } from 'lucide-react'
 
 // Configuración simple de autenticación
@@ -252,6 +256,8 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [activeView, setActiveView] = useState('orders') // 'orders' | 'calendar'
+  const [currentMonth, setCurrentMonth] = useState(new Date())
   const previousOrdersRef = useRef([])
 
   // Verificar autenticación
@@ -387,6 +393,72 @@ export default function AdminDashboard() {
       .reduce((sum, o) => sum + ((o.totalPrice || 0) * 1.18), 0)
   }
 
+  // Funciones para el calendario de ventas
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay() // 0 = Domingo
+    
+    return { daysInMonth, startingDayOfWeek, year, month }
+  }
+
+  const getSalesByDay = (year, month) => {
+    const salesByDay = {}
+    
+    orders.filter(o => o.status === 'approved').forEach(order => {
+      const orderDate = new Date(order.createdAt)
+      const orderYear = orderDate.getFullYear()
+      const orderMonth = orderDate.getMonth()
+      const orderDay = orderDate.getDate()
+      
+      if (orderYear === year && orderMonth === month) {
+        if (!salesByDay[orderDay]) {
+          salesByDay[orderDay] = { count: 0, total: 0 }
+        }
+        salesByDay[orderDay].count += 1
+        salesByDay[orderDay].total += (order.totalPrice || 0) * 1.18
+      }
+    })
+    
+    return salesByDay
+  }
+
+  const getWeeklyTotal = () => {
+    const now = new Date()
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    
+    return orders
+      .filter(o => o.status === 'approved' && new Date(o.createdAt) >= weekAgo)
+      .reduce((sum, o) => sum + ((o.totalPrice || 0) * 1.18), 0)
+  }
+
+  const getMonthlyTotal = (year, month) => {
+    return orders
+      .filter(o => {
+        const orderDate = new Date(o.createdAt)
+        return o.status === 'approved' && 
+               orderDate.getFullYear() === year && 
+               orderDate.getMonth() === month
+      })
+      .reduce((sum, o) => sum + ((o.totalPrice || 0) * 1.18), 0)
+  }
+
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+  
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+
+  const changeMonth = (direction) => {
+    setCurrentMonth(prev => {
+      const newDate = new Date(prev)
+      newDate.setMonth(newDate.getMonth() + direction)
+      return newDate
+    })
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-pure-black text-pure-white flex items-center justify-center p-4">
@@ -455,19 +527,45 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center gap-4">
+              {/* Toggle Orders/Calendar */}
+              <div className="flex items-center bg-pure-gray-800 rounded-full p-1">
+                <button
+                  onClick={() => setActiveView('orders')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    activeView === 'orders' 
+                      ? 'bg-pure-white text-pure-black' 
+                      : 'text-pure-gray-400 hover:text-pure-white'
+                  }`}
+                >
+                  <ShoppingBag size={14} />
+                  <span className="hidden sm:inline">Órdenes</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('calendar')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    activeView === 'calendar' 
+                      ? 'bg-pure-white text-pure-black' 
+                      : 'text-pure-gray-400 hover:text-pure-white'
+                  }`}
+                >
+                  <Calendar size={14} />
+                  <span className="hidden sm:inline">Calendario</span>
+                </button>
+              </div>
+
               {!notificationsEnabled && (
                 <button
                   onClick={enableNotifications}
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 bg-pure-gray-800 rounded-full text-sm hover:bg-pure-gray-700 transition-colors"
+                  className="hidden md:flex items-center gap-2 px-4 py-2 bg-pure-gray-800 rounded-full text-sm hover:bg-pure-gray-700 transition-colors"
                 >
                   <Bell size={16} />
                   Activar notificaciones
                 </button>
               )}
               {notificationsEnabled && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 rounded-full text-sm">
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 rounded-full text-sm">
                   <Bell size={16} />
-                  <span className="hidden sm:inline">Notificaciones activas</span>
+                  <span className="hidden lg:inline">Notificaciones activas</span>
                 </div>
               )}
               <button
@@ -526,6 +624,38 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Filtros y búsqueda */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por cliente, email o número de orden..."
+              className="w-full pl-10 pr-4 py-3 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-pure-white focus:outline-none focus:border-pure-white"
+            />
+          </div>
+          <div className="flex gap-2">
+            {['all', 'pending', 'approved', 'rejected'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-2 rounded-lg text-sm capitalize transition-colors ${
+                  filter === f
+                    ? 'bg-pure-white text-pure-black'
+                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                }`}
+              >
+                {f === 'all' ? 'Todas' : f === 'pending' ? 'Pendientes' : f === 'approved' ? 'Aprobadas' : 'Rechazadas'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Vista de Órdenes */}
+        {activeView === 'orders' && (
+          <>
         {/* Filtros y búsqueda */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
@@ -712,6 +842,166 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+          </>
+        )}
+
+        {/* Vista de Calendario */}
+        {activeView === 'calendar' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Header del calendario */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  className="p-2 hover:bg-pure-gray-800 rounded-lg transition-colors"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <h2 className="text-xl font-bold">
+                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                </h2>
+                <button
+                  onClick={() => changeMonth(1)}
+                  className="p-2 hover:bg-pure-gray-800 rounded-lg transition-colors"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+              
+              {/* Resumen Semanal y Mensual */}
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-xs text-pure-gray-500">Total Semanal</p>
+                  <p className="text-lg font-bold text-emerald-500">S/ {getWeeklyTotal().toFixed(0)}</p>
+                </div>
+                <div className="w-px h-10 bg-pure-gray-700" />
+                <div className="text-right">
+                  <p className="text-xs text-pure-gray-500">Total del Mes</p>
+                  <p className="text-lg font-bold text-pure-white">S/ {getMonthlyTotal(currentMonth.getFullYear(), currentMonth.getMonth()).toFixed(0)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Calendario Grid */}
+            <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-4 sm:p-6">
+              {/* Días de la semana */}
+              <div className="grid grid-cols-7 gap-2 mb-4">
+                {dayNames.map(day => (
+                  <div key={day} className="text-center text-xs text-pure-gray-500 font-medium py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Días del mes */}
+              <div className="grid grid-cols-7 gap-2">
+                {(() => {
+                  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
+                  const salesByDay = getSalesByDay(year, month)
+                  const days = []
+                  
+                  // Espacios vacíos antes del primer día
+                  for (let i = 0; i < startingDayOfWeek; i++) {
+                    days.push(<div key={`empty-${i}`} className="aspect-square" />)
+                  }
+                  
+                  // Días del mes
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const daySales = salesByDay[day]
+                    const hasSales = daySales && daySales.count > 0
+                    
+                    days.push(
+                      <div
+                        key={day}
+                        className={`aspect-square p-2 rounded-lg border transition-all ${
+                          hasSales 
+                            ? 'bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20' 
+                            : 'bg-pure-gray-800/30 border-pure-gray-700/50 hover:bg-pure-gray-800/50'
+                        }`}
+                      >
+                        <div className="flex flex-col h-full justify-between">
+                          <span className={`text-sm font-medium ${
+                            hasSales ? 'text-emerald-400' : 'text-pure-gray-400'
+                          }`}>
+                            {day}
+                          </span>
+                          {hasSales && (
+                            <div className="text-right">
+                              <p className="text-xs font-bold text-emerald-400">
+                                S/ {daySales.total.toFixed(0)}
+                              </p>
+                              <p className="text-[10px] text-pure-gray-500">
+                                {daySales.count} venta{daySales.count > 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  }
+                  
+                  return days
+                })()}
+              </div>
+            </div>
+
+            {/* Detalle de ventas del mes */}
+            <div className="bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <TrendingUp size={20} className="text-emerald-500" />
+                Resumen de Ventas - {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </h3>
+              
+              {(() => {
+                const { year, month } = getDaysInMonth(currentMonth)
+                const salesByDay = getSalesByDay(year, month)
+                const daysWithSales = Object.entries(salesByDay).sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+                
+                if (daysWithSales.length === 0) {
+                  return (
+                    <div className="text-center py-8">
+                      <Calendar size={48} className="mx-auto text-pure-gray-600 mb-4" />
+                      <p className="text-pure-gray-400">No hay ventas este mes</p>
+                    </div>
+                  )
+                }
+                
+                return (
+                  <div className="space-y-3">
+                    {daysWithSales.map(([day, data]) => (
+                      <div key={day} className="flex items-center justify-between p-3 bg-pure-gray-800/50 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                            <span className="text-sm font-bold text-emerald-400">{day}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{new Date(year, month, parseInt(day)).toLocaleDateString('es-PE', { weekday: 'long' })}</p>
+                            <p className="text-xs text-pure-gray-500">{data.count} orden{data.count > 1 ? 'es' : ''}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-emerald-400">S/ {data.total.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Total del mes */}
+                    <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mt-4">
+                      <p className="font-semibold">Total del mes</p>
+                      <p className="text-2xl font-bold text-emerald-400">
+                        S/ {getMonthlyTotal(year, month).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   )
