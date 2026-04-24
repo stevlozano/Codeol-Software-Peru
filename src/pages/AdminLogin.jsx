@@ -109,6 +109,7 @@ export default function AdminLogin() {
     }
     
     try {
+      // First, sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registerData.email,
         password: registerData.password
@@ -126,18 +127,25 @@ export default function AdminLogin() {
         return
       }
       
-      // Wait for session to be established
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Immediately sign in to establish session
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: registerData.email,
+        password: registerData.password
+      })
       
-      // Get session to ensure we're authenticated
-      const { data: { session } } = await supabase.auth.getSession()
+      if (signInError) {
+        setError('Error al iniciar sesión: ' + signInError.message)
+        setLoading(false)
+        return
+      }
       
-      if (!session) {
+      if (!signInData.session) {
         setError('Error: No se pudo establecer la sesión')
         setLoading(false)
         return
       }
       
+      // Now insert into admins table
       const { error: insertError } = await supabase
         .from('admins')
         .insert({
