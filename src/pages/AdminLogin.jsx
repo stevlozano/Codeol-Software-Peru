@@ -139,6 +139,8 @@ export default function AdminLogin() {
         return
       }
       
+      // Set sessionStorage for AdminDashboard compatibility
+      sessionStorage.setItem('codeol-admin-auth', 'true')
       navigate('/admin')
     } catch (err) {
       setError('Error al iniciar sesión: ' + err.message)
@@ -209,6 +211,7 @@ export default function AdminLogin() {
       
       setSuccess('¡Cuenta creada exitosamente! Redirigiendo...')
       setTimeout(() => {
+        sessionStorage.setItem('codeol-admin-auth', 'true')
         navigate('/admin')
       }, 1500)
     } catch (err) {
