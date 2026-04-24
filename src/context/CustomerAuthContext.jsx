@@ -19,6 +19,10 @@ export function CustomerAuthProvider({ children }) {
 
   // Cargar sesión al iniciar - desde Supabase o localStorage
   useEffect(() => {
+    // Skip loading if on admin pages to prevent 406 errors
+    if (window.location.pathname.startsWith('/admin')) {
+      return
+    }
     loadSession()
   }, [])
 
