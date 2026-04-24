@@ -130,7 +130,7 @@ export default function OrderStatus() {
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(22)
     doc.setFont('helvetica', 'bold')
-    doc.text('◆ CODEOL', 20, 24)
+    doc.text(' CODEOL', 20, 24)
     doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
     doc.text('SOFTWARE PERÚ', 20, 32)
@@ -268,7 +268,7 @@ export default function OrderStatus() {
     doc.setTextColor(150, 150, 150)
     doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
-    doc.text('codeolsoftware@gmail.com  |  +51 916 895 252  |  [TU-WEB-OFICIAL.COM]', 105, 290, { align: 'center' })
+    doc.text('codeolsoftware@gmail.com  |  +51 916 895 252  |  codeolsoftware.work', 105, 290, { align: 'center' })
     doc.setFontSize(7)
     doc.text('Gracias por confiar en nosotros', 105, 294, { align: 'center' })
     
