@@ -48,8 +48,24 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     setIsProcessing(true)
     
+    // Generate a unique ID for the order
+    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Get current user session if logged in
+    let customerId = null
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        customerId = session.user.id
+      }
+    } catch (err) {
+      console.log('No active session')
+    }
+    
     // Prepare order data
     const order = {
+      id: orderId,
+      customer_id: customerId,
       customer_email: formData.email,
       customer_name: formData.nombre,
       customer_phone: formData.telefono,
@@ -59,53 +75,55 @@ export default function CheckoutPage() {
       items: cart,
       total_price: totalPrice,
       payment_method: selectedPayment,
-      status: 'pending'
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
+    
+    let savedToSupabase = false
     
     // Try to save to Supabase first
     if (isSupabaseConfigured()) {
       try {
+        console.log('Saving order to Supabase:', order)
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .insert(order)
           .select()
-          .single()
         
         if (orderError) {
           console.error('Error saving order to Supabase:', orderError)
-          // Fall back to localStorage
+          alert('Error al guardar el pedido: ' + orderError.message)
         } else {
-          console.log('Order saved to Supabase:', orderData.id)
-          // Store order reference
-          localStorage.setItem('last-order-id', orderData.id)
+          console.log('Order saved to Supabase:', orderData)
+          savedToSupabase = true
+          localStorage.setItem('last-order-id', orderId)
           localStorage.setItem('last-order-from-supabase', 'true')
         }
       } catch (err) {
         console.error('Error in Supabase save:', err)
+        alert('Error de conexión. Intenta nuevamente.')
+        setIsProcessing(false)
+        return
       }
     }
     
-    // Always save to localStorage as backup
+    // Save to localStorage as backup (always, even if Supabase succeeded)
     const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
-    const newOrder = {
-      ...order,
-      id: Date.now().toString(),
-      created_at: new Date().toISOString()
-    }
-    orders.unshift(newOrder)
+    orders.unshift(order)
     localStorage.setItem('codeol-orders', JSON.stringify(orders))
+    
+    // Only proceed if saved to Supabase
+    if (!savedToSupabase) {
+      setIsProcessing(false)
+      return
+    }
     
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000))
     setIsProcessing(false)
     setIsCompleted(true)
     clearCart()
-    
-    // Store order reference for customer tracking
-    if (!localStorage.getItem('last-order-id')) {
-      localStorage.setItem('last-order-id', newOrder.id)
-      localStorage.setItem('last-order-from-supabase', 'false')
-    }
     
     setTimeout(() => navigate('/order-status'), 5000)
   }
