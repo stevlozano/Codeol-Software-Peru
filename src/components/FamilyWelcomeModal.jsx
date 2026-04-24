@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Gift, Star, History, Bell, Crown, UserPlus, LogIn, User } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
 
 export default function FamilyWelcomeModal() {
@@ -18,28 +19,31 @@ export default function FamilyWelcomeModal() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   
+  const navigate = useNavigate()
   const { register, login, isLoggedIn } = useCustomerAuth()
 
-  // Mostrar modal al entrar por primera vez o cuando quiere hacer login
+  // Mostrar modal al entrar por primera vez
   useEffect(() => {
     const hasSeenModal = sessionStorage.getItem('codeol-family-modal-seen')
-    const wantsLogin = sessionStorage.getItem('codeol-wants-login')
     
-    if (!isLoggedIn) {
-      if (wantsLogin) {
-        // Usuario quiere iniciar sesión desde el navbar
-        setShowLogin(true)
+    if (!isLoggedIn && !hasSeenModal) {
+      // Primera visita - mostrar después de 2 segundos
+      const timer = setTimeout(() => {
         setIsOpen(true)
-        sessionStorage.removeItem('codeol-wants-login')
-      } else if (!hasSeenModal) {
-        // Primera visita - mostrar después de 2 segundos
-        const timer = setTimeout(() => {
-          setIsOpen(true)
-        }, 2000)
-        return () => clearTimeout(timer)
-      }
+      }, 2000)
+      return () => clearTimeout(timer)
     }
   }, [isLoggedIn])
+
+  const goToLogin = () => {
+    closeModal()
+    navigate('/login')
+  }
+
+  const goToRegister = () => {
+    closeModal()
+    navigate('/login')
+  }
 
   const closeModal = () => {
     setIsOpen(false)
@@ -294,31 +298,12 @@ export default function FamilyWelcomeModal() {
                     <h4 className="font-semibold mb-1">Niveles VIP</h4>
                     <p className="text-sm text-pure-gray-400">Bronce → Plata → Oro</p>
                   </div>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setShowRegister(true)}
-                    className="w-full py-3 bg-pure-white text-pure-black font-semibold rounded-lg hover:bg-pure-gray-200 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <UserPlus size={20} />
-                    Registrarme ahora
-                  </button>
                   
-                  <button
-                    onClick={() => setShowLogin(true)}
-                    className="w-full py-3 bg-pure-gray-800 text-pure-white font-semibold rounded-lg hover:bg-pure-gray-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <User size={20} />
-                    Ya tengo cuenta
-                  </button>
-                  
-                  <button
-                    onClick={handleContinueAsGuest}
-                    className="w-full py-2 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
-                  >
-                    Continuar como invitado
-                  </button>
+                  <div className="p-4 bg-pure-gray-900/50 border border-pure-gray-800 rounded-xl">
+                    <History size={24} className="text-blue-500 mb-2" />
+                    <h4 className="font-semibold mb-1">Historial de Compras</h4>
+                    <p className="text-sm text-pure-gray-400">Todas tus órdenes en un lugar</p>
+                  </div>
                 </div>
               </>
             )}

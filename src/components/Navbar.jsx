@@ -122,8 +122,7 @@ export default function Navbar() {
 
           {/* User Account Button */}
           <Link
-            to={isLoggedIn ? "/mi-cuenta" : "/"}
-            onClick={() => !isLoggedIn && sessionStorage.setItem('codeol-wants-login', 'true')}
+            to={isLoggedIn ? "/mi-cuenta" : "/login"}
             className={`hidden md:flex items-center gap-2 ml-2 px-3 py-2 text-xs tracking-[0.1em] uppercase rounded-full transition-colors duration-300 ${
               isLoggedIn 
                 ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30' 

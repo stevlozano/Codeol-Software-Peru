@@ -1,0 +1,332 @@
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Shield, Lock, UserPlus, LogIn, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+
+// Admin credentials storage
+const ADMIN_STORAGE_KEY = 'codeol-admin-account'
+
+export default function AdminLogin() {
+  const navigate = useNavigate()
+  const [isLogin, setIsLogin] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  })
+  
+  const [registerData, setRegisterData] = useState({
+    nombre: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
+
+  // Check if already logged in
+  useEffect(() => {
+    const auth = sessionStorage.getItem('codeol-admin-auth')
+    if (auth === 'true') {
+      navigate('/admin')
+    }
+  }, [navigate])
+
+  // Check if admin exists
+  const adminExists = () => {
+    const admin = localStorage.getItem(ADMIN_STORAGE_KEY)
+    return !!admin
+  }
+
+  const handleLogin = (e) => {
+    e.preventDefault()
+    setError('')
+    
+    const admin = JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY) || '{}')
+    
+    if (!admin.email) {
+      setError('No hay cuenta de administrador registrada. Por favor regístrate primero.')
+      return
+    }
+    
+    if (admin.email !== loginData.email || admin.password !== loginData.password) {
+      setError('Correo o contraseña incorrectos')
+      return
+    }
+    
+    sessionStorage.setItem('codeol-admin-auth', 'true')
+    navigate('/admin')
+  }
+
+  const handleRegister = (e) => {
+    e.preventDefault()
+    setError('')
+    
+    if (registerData.password !== registerData.confirmPassword) {
+      setError('Las contraseñas no coinciden')
+      return
+    }
+    
+    if (registerData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    
+    if (adminExists()) {
+      setError('Ya existe una cuenta de administrador')
+      return
+    }
+    
+    const adminAccount = {
+      nombre: registerData.nombre,
+      email: registerData.email,
+      password: registerData.password,
+      createdAt: new Date().toISOString()
+    }
+    
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminAccount))
+    setSuccess('¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.')
+    
+    setTimeout(() => {
+      setIsLogin(true)
+      setSuccess('')
+      setLoginData({ ...loginData, email: registerData.email })
+    }, 2000)
+  }
+
+  return (
+    <div className="min-h-screen bg-pure-black text-pure-white flex items-center justify-center p-4">
+      {/* Background pattern */}
+      <div className="fixed inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-full max-w-md"
+      >
+        {/* Card */}
+        <div className="bg-pure-gray-900/80 backdrop-blur border border-pure-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+          {/* Header */}
+          <div className="relative bg-gradient-to-br from-pure-gray-800 to-pure-gray-900 p-8 text-center">
+            <div className="absolute top-4 left-4">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-1 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
+              >
+                <ArrowLeft size={16} />
+                Volver
+              </button>
+            </div>
+            
+            <div className="w-20 h-20 bg-pure-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Shield size={40} className="text-pure-black" />
+            </div>
+            
+            <h1 className="text-2xl font-bold mb-1">
+              {isLogin ? 'Panel Administrativo' : 'Registro Admin'}
+            </h1>
+            <p className="text-pure-gray-400 text-sm">
+              {isLogin ? 'Codeol Software Perú' : 'Crear cuenta de administrador'}
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="p-8">
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl"
+              >
+                <p className="text-emerald-400 text-sm text-center">{success}</p>
+              </motion.div>
+            )}
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
+              >
+                <p className="text-red-400 text-sm text-center">{error}</p>
+              </motion.div>
+            )}
+
+            {isLogin ? (
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <LogIn size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type="email"
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="admin@codeol.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      className="w-full pl-12 pr-12 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-pure-gray-500 hover:text-pure-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <LogIn size={20} />
+                  Iniciar sesión
+                </button>
+
+                {!adminExists() && (
+                  <div className="text-center pt-4">
+                    <p className="text-pure-gray-500 text-sm mb-2">¿No tienes cuenta?</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsLogin(false)}
+                      className="text-pure-white hover:text-pure-gray-300 transition-colors text-sm font-medium"
+                    >
+                      Crear cuenta de administrador →
+                    </button>
+                  </div>
+                )}
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Nombre completo
+                  </label>
+                  <div className="relative">
+                    <UserPlus size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type="text"
+                      value={registerData.nombre}
+                      onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="Tu nombre"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <LogIn size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type="email"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="admin@codeol.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                      className="w-full pl-12 pr-12 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-pure-gray-500 hover:text-pure-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
+                    Confirmar contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-pure-gray-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={registerData.confirmPassword}
+                      onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                      className="w-full pl-12 pr-4 py-4 bg-pure-black border border-pure-gray-700 rounded-xl focus:outline-none focus:border-pure-white focus:ring-1 focus:ring-pure-white transition-all"
+                      placeholder="Repite tu contraseña"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <UserPlus size={20} />
+                  Crear cuenta
+                </button>
+
+                <div className="text-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(true)}
+                    className="text-pure-gray-500 hover:text-pure-white transition-colors text-sm"
+                  >
+                    ← Volver al login
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-pure-gray-500 text-sm mt-6">
+          Codeol Software Perú © {new Date().getFullYear()}
+        </p>
+      </motion.div>
+    </div>
+  )
+}

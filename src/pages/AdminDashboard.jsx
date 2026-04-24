@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { jsPDF } from 'jspdf'
 import { 
@@ -28,9 +29,6 @@ import {
   Crown,
   Medal
 } from 'lucide-react'
-
-// Configuración simple de autenticación
-const ADMIN_PASSWORD = 'codeol2024' // Cambia esto por una contraseña segura
 
 // Simulación de base de datos con localStorage
 const getOrders = () => {
@@ -460,21 +458,19 @@ export default function AdminDashboard() {
     }
   }
 
-  // Login
-  const handleLogin = (e) => {
-    e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem('codeol-admin-auth', 'true')
-      setIsAuthenticated(true)
-    } else {
-      alert('Contraseña incorrecta')
-    }
-  }
-
   // Logout
   const handleLogout = () => {
     sessionStorage.removeItem('codeol-admin-auth')
     setIsAuthenticated(false)
+  }
+
+  // Componente para redirigir al login
+  function RedirectToLogin() {
+    const navigate = useNavigate()
+    useEffect(() => {
+      navigate('/admin-login', { replace: true })
+    }, [navigate])
+    return null
   }
 
   // Aprobar orden
@@ -609,50 +605,9 @@ export default function AdminDashboard() {
     })
   }
 
+  // Redirect to login page if not authenticated
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-pure-black text-pure-white flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-pure-white rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag size={32} className="text-pure-black" />
-            </div>
-            <h1 className="text-2xl font-bold">Panel de Administración</h1>
-            <p className="text-pure-gray-400">Codeol Software Perú</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-pure-gray-500 mb-2">
-                Contraseña de administrador
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-pure-gray-900 border border-pure-gray-800 rounded-lg text-pure-white focus:outline-none focus:border-pure-white"
-                placeholder="Ingresa la contraseña"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-4 bg-pure-white text-pure-black rounded-full font-medium hover:bg-pure-gray-200 transition-colors"
-            >
-              Ingresar al Dashboard
-            </button>
-          </form>
-
-          <p className="text-xs text-pure-gray-500 text-center mt-4">
-            Acceso exclusivo para administradores
-          </p>
-        </motion.div>
-      </div>
-    )
+    return <RedirectToLogin />
   }
 
   return (
