@@ -14,6 +14,7 @@ import {
   Bell,
   BellRing
 } from 'lucide-react'
+import AdminPWAInstall from '../components/AdminPWAInstall'
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -739,6 +740,9 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+      
+      {/* PWA Install Banner */}
+      <AdminPWAInstall />
     </div>
   )
 }

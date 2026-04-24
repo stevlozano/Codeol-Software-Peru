@@ -1,0 +1,30 @@
+{
+  "id": "codeol-admin",
+  "name": "CODEOL Admin Dashboard",
+  "short_name": "CODEOL Admin",
+  "description": "Panel de administración para CODEOL Software Perú",
+  "start_url": "/admin?utm_source=pwa&utm_medium=shortcut",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/logooriginal.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logooriginal.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "es-PE",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}
