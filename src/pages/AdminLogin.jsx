@@ -39,7 +39,6 @@ export default function AdminLogin() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
           window.navigator.standalone === true
       if (isStandalone) {
-        console.log('App is already installed (standalone mode)')
         setIsInstalled(true)
       }
       return isStandalone
@@ -50,18 +49,15 @@ export default function AdminLogin() {
     
     // Listen for PWA install prompt
     const handleBeforeInstallPrompt = (e) => {
-      console.log('beforeinstallprompt event fired!')
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Store the event for later use
       setDeferredPrompt(e)
       setIsInstallable(true)
-      console.log('App is installable - button should show')
     }
     
     // Check if we already captured the event globally (it fires early)
     if (window.deferredInstallPrompt) {
-      console.log('Using globally captured install prompt')
       setDeferredPrompt(window.deferredInstallPrompt)
       setIsInstallable(true)
     }
@@ -70,7 +66,6 @@ export default function AdminLogin() {
     
     // Listen for app installed event
     const handleAppInstalled = () => {
-      console.log('App was installed!')
       setIsInstalled(true)
       setIsInstallable(false)
       setDeferredPrompt(null)

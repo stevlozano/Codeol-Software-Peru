@@ -27,11 +27,24 @@ export function CustomerAuthProvider({ children }) {
     if (isSupabaseConfigured()) {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
-        const { data: profile } = await supabase
+        // First check if user is an admin to avoid 406 error
+        const { data: adminCheck } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        
+        // If user is admin, don't try to load as customer
+        if (adminCheck) {
+          return
+        }
+        
+        // Try to load as customer
+        const { data: profile, error } = await supabase
           .from('customers')
           .select('*')
           .eq('id', session.user.id)
-          .single()
+          .maybeSingle()
         
         if (profile) {
           const { password, ...customerData } = profile
