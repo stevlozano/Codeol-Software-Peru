@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "616346595413",
+    "project_id": "codeol-software-peu",
+    "storage_bucket": "codeol-software-peu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616346595413:android:6501391f0baee8aa7364dc",
+        "android_client_info": {
+          "package_name": "com.codeol.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz2r2ogz1FiYCX62Xy8n38x72537jbLJ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
