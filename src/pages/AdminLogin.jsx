@@ -139,6 +139,30 @@ export default function AdminLogin() {
 
           {/* Form */}
           <div className="p-8">
+            {/* Tabs */}
+            <div className="flex mb-6 bg-pure-gray-800 rounded-xl p-1">
+              <button
+                onClick={() => setIsLogin(true)}
+                className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all ${
+                  isLogin 
+                    ? 'bg-pure-white text-pure-black' 
+                    : 'text-pure-gray-400 hover:text-pure-white'
+                }`}
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={() => setIsLogin(false)}
+                className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all ${
+                  !isLogin 
+                    ? 'bg-pure-white text-pure-black' 
+                    : 'text-pure-gray-400 hover:text-pure-white'
+                }`}
+              >
+                Crear cuenta
+              </button>
+            </div>
+
             {success && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -209,19 +233,6 @@ export default function AdminLogin() {
                   <LogIn size={20} />
                   Iniciar sesión
                 </button>
-
-                {!adminExists() && (
-                  <div className="text-center pt-4">
-                    <p className="text-pure-gray-500 text-sm mb-2">¿No tienes cuenta?</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsLogin(false)}
-                      className="text-pure-white hover:text-pure-gray-300 transition-colors text-sm font-medium"
-                    >
-                      Crear cuenta de administrador →
-                    </button>
-                  </div>
-                )}
               </form>
             ) : (
               <form onSubmit={handleRegister} className="space-y-4">
