@@ -277,11 +277,46 @@ export function CustomerAuthProvider({ children }) {
   }
 
   // Obtener historial de compras
-  const getOrderHistory = () => {
+  const getOrderHistory = async () => {
     if (!customer) return []
+    
+    // Try Supabase first
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('customer_email', customer.email)
+          .order('created_at', { ascending: false })
+        
+        if (!error && data && data.length > 0) {
+          // Transform to expected format
+          return data.map(order => ({
+            id: order.id,
+            customer: {
+              nombre: order.customer_name,
+              email: order.customer_email,
+              telefono: order.customer_phone,
+              empresa: order.customer_company,
+              ruc: order.customer_ruc,
+              direccion: order.customer_address
+            },
+            items: order.items,
+            totalPrice: order.total_price,
+            paymentMethod: order.payment_method,
+            status: order.status,
+            createdAt: order.created_at
+          }))
+        }
+      } catch (err) {
+        console.error('Error fetching order history from Supabase:', err)
+      }
+    }
+    
+    // Fallback to localStorage
     const allOrders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
     return allOrders.filter(o => o.customer?.email === customer.email).sort((a, b) => 
-      new Date(b.created_at) - new Date(a.created_at)
+      new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt)
     )
   }
 

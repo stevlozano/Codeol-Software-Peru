@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { jsPDF } from 'jspdf'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { 
   Bell, 
   CheckCircle, 
@@ -30,8 +31,39 @@ import {
   Medal
 } from 'lucide-react'
 
-// Simulación de base de datos con localStorage
-const getOrders = () => {
+// Get orders from Supabase with fallback to localStorage
+const getOrders = async () => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (!error && data) {
+        // Transform data to match expected format
+        return data.map(order => ({
+          ...order,
+          customer: {
+            nombre: order.customer_name,
+            email: order.customer_email,
+            telefono: order.customer_phone,
+            empresa: order.customer_company,
+            ruc: order.customer_ruc,
+            direccion: order.customer_address
+          },
+          totalPrice: order.total_price,
+          paymentMethod: order.payment_method,
+          createdAt: order.created_at
+        }))
+      }
+    } catch (err) {
+      console.error('Error fetching orders from Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
   const saved = localStorage.getItem('codeol-orders')
   return saved ? JSON.parse(saved) : []
 }
@@ -50,15 +82,64 @@ const saveOrder = (order) => {
   return newOrder
 }
 
-const updateOrderStatus = (orderId, status) => {
-  const orders = getOrders()
+const updateOrderStatus = async (orderId, status) => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId)
+      
+      if (!error) {
+        // Return updated order
+        const { data } = await supabase.from('orders').select('*').eq('id', orderId).single()
+        if (data) {
+          return {
+            ...data,
+            customer: {
+              nombre: data.customer_name,
+              email: data.customer_email,
+              telefono: data.customer_phone,
+              empresa: data.customer_company,
+              ruc: data.customer_ruc,
+              direccion: data.customer_address
+            },
+            totalPrice: data.total_price,
+            paymentMethod: data.payment_method,
+            createdAt: data.created_at
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error updating order in Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
+  const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
   const updated = orders.map(o => o.id === orderId ? { ...o, status } : o)
   localStorage.setItem('codeol-orders', JSON.stringify(updated))
   return updated.find(o => o.id === orderId)
 }
 
-const deleteOrder = (orderId) => {
-  const orders = getOrders()
+const deleteOrder = async (orderId) => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId)
+      
+      if (!error) return
+    } catch (err) {
+      console.error('Error deleting order from Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
+  const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
   const filtered = orders.filter(o => o.id !== orderId)
   localStorage.setItem('codeol-orders', JSON.stringify(filtered))
 }
@@ -348,8 +429,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isAuthenticated) return
 
-    const checkOrders = () => {
-      const currentOrders = getOrders()
+    const checkOrders = async () => {
+      const currentOrders = await getOrders()
       
       // Detectar nuevas órdenes
       if (previousOrdersRef.current.length > 0) {
@@ -474,9 +555,10 @@ export default function AdminDashboard() {
   }
 
   // Aprobar orden
-  const approveOrder = (orderId) => {
-    const order = updateOrderStatus(orderId, 'approved')
-    setOrders(getOrders())
+  const approveOrder = async (orderId) => {
+    const order = await updateOrderStatus(orderId, 'approved')
+    const updatedOrders = await getOrders()
+    setOrders(updatedOrders)
     
     // Generar PDF
     const pdf = generateOrderPDF(order)
@@ -496,19 +578,21 @@ export default function AdminDashboard() {
   }
 
   // Rechazar orden
-  const rejectOrder = (orderId) => {
-    updateOrderStatus(orderId, 'rejected')
-    setOrders(getOrders())
+  const rejectOrder = async (orderId) => {
+    await updateOrderStatus(orderId, 'rejected')
+    const updatedOrders = await getOrders()
+    setOrders(updatedOrders)
     if (notificationsEnabled) {
       sendPushNotification('Orden rechazada', `La orden #${orderId.slice(-6)} ha sido rechazada.`)
     }
   }
 
   // Eliminar orden
-  const handleDeleteOrder = (orderId) => {
+  const handleDeleteOrder = async (orderId) => {
     if (confirm('¿Estás seguro de eliminar esta orden?')) {
-      deleteOrder(orderId)
-      setOrders(getOrders())
+      await deleteOrder(orderId)
+      const updatedOrders = await getOrders()
+      setOrders(updatedOrders)
     }
   }
 

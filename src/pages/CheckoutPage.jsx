@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Chatbot from '../components/Chatbot'
@@ -45,20 +46,49 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     setIsProcessing(true)
     
-    // Save order to localStorage for admin dashboard
+    // Prepare order data
     const order = {
-      customer: formData,
+      customer_email: formData.email,
+      customer_name: formData.nombre,
+      customer_phone: formData.telefono,
+      customer_company: formData.empresa || '',
+      customer_ruc: formData.ruc || '',
+      customer_address: formData.direccion || '',
       items: cart,
-      totalPrice: totalPrice,
-      paymentMethod: selectedPayment,
+      total_price: totalPrice,
+      payment_method: selectedPayment,
       status: 'pending'
     }
     
+    // Try to save to Supabase first
+    if (isSupabaseConfigured()) {
+      try {
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .insert(order)
+          .select()
+          .single()
+        
+        if (orderError) {
+          console.error('Error saving order to Supabase:', orderError)
+          // Fall back to localStorage
+        } else {
+          console.log('Order saved to Supabase:', orderData.id)
+          // Store order reference
+          localStorage.setItem('last-order-id', orderData.id)
+          localStorage.setItem('last-order-from-supabase', 'true')
+        }
+      } catch (err) {
+        console.error('Error in Supabase save:', err)
+      }
+    }
+    
+    // Always save to localStorage as backup
     const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
     const newOrder = {
       ...order,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     }
     orders.unshift(newOrder)
     localStorage.setItem('codeol-orders', JSON.stringify(orders))
@@ -70,7 +100,10 @@ export default function CheckoutPage() {
     clearCart()
     
     // Store order reference for customer tracking
-    localStorage.setItem('last-order-id', newOrder.id)
+    if (!localStorage.getItem('last-order-id')) {
+      localStorage.setItem('last-order-id', newOrder.id)
+      localStorage.setItem('last-order-from-supabase', 'false')
+    }
     
     setTimeout(() => navigate('/order-status'), 5000)
   }
