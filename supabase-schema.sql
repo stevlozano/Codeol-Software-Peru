@@ -121,3 +121,21 @@ CREATE POLICY "Admins can view own profile" ON admins
 -- Insertar solo durante registro (el trigger de auth manejará esto)
 CREATE POLICY "Allow insert during admin signup" ON admins
   FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ============================================
+-- TABLA DE PROMOCIONES
+-- ============================================
+CREATE TABLE IF NOT EXISTS promotions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  discount_percent INTEGER NOT NULL,
+  min_purchase DECIMAL(10,2) DEFAULT 0,
+  code TEXT UNIQUE NOT NULL,
+  valid_until TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- No RLS needed for promotions - they're public
+-- But we can add policies if needed in the future

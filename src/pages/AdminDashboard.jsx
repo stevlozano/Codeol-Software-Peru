@@ -150,8 +150,29 @@ const getCustomers = () => {
   return saved ? JSON.parse(saved) : []
 }
 
-const getCustomerStats = (email) => {
-  const orders = getOrders()
+const getCustomerStats = async (email) => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('customer_email', email)
+        .eq('status', 'approved')
+      
+      if (!error && data) {
+        return {
+          totalOrders: data.length,
+          totalSpent: data.reduce((sum, o) => sum + ((o.total_price || 0) * 1.18), 0)
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching customer stats from Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
+  const orders = JSON.parse(localStorage.getItem('codeol-orders') || '[]')
   const customerOrders = orders.filter(o => 
     o.customer?.email === email && o.status === 'approved'
   )
@@ -162,13 +183,77 @@ const getCustomerStats = (email) => {
 }
 
 // Funciones para promociones
-const getPromotions = () => {
+const getPromotions = async () => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('promotions')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (!error && data) {
+        // Transform to match expected format
+        return data.map(p => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          discountPercent: p.discount_percent,
+          minPurchase: p.min_purchase,
+          code: p.code,
+          validUntil: p.valid_until,
+          isActive: p.is_active,
+          createdAt: p.created_at
+        }))
+      }
+    } catch (err) {
+      console.error('Error fetching promotions from Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
   const saved = localStorage.getItem('codeol-promotions')
   return saved ? JSON.parse(saved) : []
 }
 
-const savePromotion = (promotion) => {
-  const promotions = getPromotions()
+const savePromotion = async (promotion) => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('promotions')
+        .insert({
+          title: promotion.title,
+          description: promotion.description,
+          discount_percent: promotion.discountPercent,
+          min_purchase: promotion.minPurchase || 0,
+          code: promotion.code,
+          valid_until: promotion.validUntil || null,
+          is_active: true
+        })
+        .select()
+        .single()
+      
+      if (!error && data) {
+        return {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          discountPercent: data.discount_percent,
+          minPurchase: data.min_purchase,
+          code: data.code,
+          validUntil: data.valid_until,
+          isActive: data.is_active,
+          createdAt: data.created_at
+        }
+      }
+    } catch (err) {
+      console.error('Error saving promotion to Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
+  const promotions = await getPromotions()
   const newPromo = {
     ...promotion,
     id: Date.now().toString(),
@@ -180,16 +265,52 @@ const savePromotion = (promotion) => {
   return newPromo
 }
 
-const deletePromotion = (promoId) => {
-  const promotions = getPromotions()
+const deletePromotion = async (promoId) => {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { error } = await supabase
+        .from('promotions')
+        .delete()
+        .eq('id', promoId)
+      
+      if (!error) return
+    } catch (err) {
+      console.error('Error deleting promotion from Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
+  const promotions = JSON.parse(localStorage.getItem('codeol-promotions') || '[]')
   const filtered = promotions.filter(p => p.id !== promoId)
   localStorage.setItem('codeol-promotions', JSON.stringify(filtered))
 }
 
-const togglePromotionStatus = (promoId) => {
-  const promotions = getPromotions()
+const togglePromotionStatus = async (promoId) => {
+  // Get current promotion
+  const promotions = await getPromotions()
+  const promo = promotions.find(p => p.id === promoId)
+  if (!promo) return
+  
+  const newStatus = !promo.isActive
+  
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const { error } = await supabase
+        .from('promotions')
+        .update({ is_active: newStatus })
+        .eq('id', promoId)
+      
+      if (!error) return
+    } catch (err) {
+      console.error('Error updating promotion status in Supabase:', err)
+    }
+  }
+  
+  // Fallback to localStorage
   const updated = promotions.map(p => 
-    p.id === promoId ? { ...p, isActive: !p.isActive } : p
+    p.id === promoId ? { ...p, isActive: newStatus } : p
   )
   localStorage.setItem('codeol-promotions', JSON.stringify(updated))
 }
@@ -462,17 +583,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isAuthenticated) return
     
-    const loadData = () => {
+    const loadData = async () => {
       // Cargar clientes con estadísticas
       const allCustomers = getCustomers()
-      const customersWithStats = allCustomers.map(c => ({
-        ...c,
-        stats: getCustomerStats(c.email)
-      })).sort((a, b) => b.stats.totalSpent - a.stats.totalSpent)
+      const customersWithStats = await Promise.all(
+        allCustomers.map(async (c) => ({
+          ...c,
+          stats: await getCustomerStats(c.email)
+        }))
+      )
+      customersWithStats.sort((a, b) => b.stats.totalSpent - a.stats.totalSpent)
       setCustomers(customersWithStats)
       
       // Cargar promociones
-      setPromotions(getPromotions())
+      const promos = await getPromotions()
+      setPromotions(promos)
     }
     
     loadData()
@@ -481,7 +606,7 @@ export default function AdminDashboard() {
   }, [isAuthenticated])
 
   // Manejar formulario de promociones
-  const handlePromoSubmit = (e) => {
+  const handlePromoSubmit = async (e) => {
     e.preventDefault()
     
     if (!promoFormData.title || !promoFormData.discountPercent || !promoFormData.code) {
@@ -489,13 +614,14 @@ export default function AdminDashboard() {
       return
     }
     
-    savePromotion({
+    await savePromotion({
       ...promoFormData,
       discountPercent: parseInt(promoFormData.discountPercent),
       minPurchase: parseFloat(promoFormData.minPurchase) || 0
     })
     
-    setPromotions(getPromotions())
+    const promos = await getPromotions()
+    setPromotions(promos)
     setShowPromoForm(false)
     setPromoFormData({
       title: '',
@@ -509,16 +635,18 @@ export default function AdminDashboard() {
     alert('¡Promoción creada exitosamente!')
   }
 
-  const handleDeletePromo = (promoId) => {
+  const handleDeletePromo = async (promoId) => {
     if (confirm('¿Estás seguro de eliminar esta promoción?')) {
-      deletePromotion(promoId)
-      setPromotions(getPromotions())
+      await deletePromotion(promoId)
+      const promos = await getPromotions()
+      setPromotions(promos)
     }
   }
 
-  const handleTogglePromo = (promoId) => {
-    togglePromotionStatus(promoId)
-    setPromotions(getPromotions())
+  const handleTogglePromo = async (promoId) => {
+    await togglePromotionStatus(promoId)
+    const promos = await getPromotions()
+    setPromotions(promos)
   }
 
   // Toggle notificaciones (activar/desactivar)
