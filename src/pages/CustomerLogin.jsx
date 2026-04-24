@@ -12,6 +12,7 @@ export default function CustomerLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -33,12 +34,14 @@ export default function CustomerLogin() {
     }
   }, [isLoggedIn, navigate])
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
     
-    const result = login(loginData.email, loginData.password)
+    const result = await login(loginData.email, loginData.password)
     
+    setIsLoading(false)
     if (result.success) {
       navigate('/mi-cuenta')
     } else {
@@ -46,27 +49,31 @@ export default function CustomerLogin() {
     }
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
     
     if (registerData.password !== registerData.confirmPassword) {
       setError('Las contraseñas no coinciden')
+      setIsLoading(false)
       return
     }
     
     if (registerData.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres')
+      setIsLoading(false)
       return
     }
     
-    const result = register({
+    const result = await register({
       nombre: registerData.nombre,
       email: registerData.email,
       telefono: registerData.telefono,
       password: registerData.password
     })
     
+    setIsLoading(false)
     if (result.success) {
       setSuccess('¡Bienvenido a la Familia CODEOL!')
       setTimeout(() => {
@@ -229,10 +236,20 @@ export default function CustomerLogin() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  disabled={isLoading}
+                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <LogIn size={20} />
-                  Iniciar sesión
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-pure-black/30 border-t-pure-black rounded-full animate-spin" />
+                      Iniciando...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={20} />
+                      Iniciar sesión
+                    </>
+                  )}
                 </button>
 
                 <div className="text-center pt-4">
@@ -336,10 +353,20 @@ export default function CustomerLogin() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  disabled={isLoading}
+                  className="w-full py-4 bg-pure-white text-pure-black font-semibold rounded-xl hover:bg-pure-gray-200 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <UserPlus size={20} />
-                  Unirme a la Familia
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-pure-black/30 border-t-pure-black rounded-full animate-spin" />
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={20} />
+                      Unirme a la Familia
+                    </>
+                  )}
                 </button>
 
                 <div className="text-center pt-4">

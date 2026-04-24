@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 const CustomerAuthContext = createContext()
 
@@ -16,8 +17,33 @@ export function CustomerAuthProvider({ children }) {
   const [totalOrders, setTotalOrders] = useState(0)
   const [totalSpent, setTotalSpent] = useState(0)
 
-  // Cargar sesión al iniciar
+  // Cargar sesión al iniciar - desde Supabase o localStorage
   useEffect(() => {
+    loadSession()
+  }, [])
+
+  const loadSession = async () => {
+    // Intentar cargar desde Supabase primero
+    if (isSupabaseConfigured()) {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profile) {
+          const { password, ...customerData } = profile
+          setCustomer(customerData)
+          setIsLoggedIn(true)
+          updateLoyaltyStats(profile.email)
+          return
+        }
+      }
+    }
+    
+    // Fallback a localStorage
     const savedCustomer = localStorage.getItem('codeol-customer')
     if (savedCustomer) {
       const parsed = JSON.parse(savedCustomer)
@@ -25,7 +51,7 @@ export function CustomerAuthProvider({ children }) {
       setIsLoggedIn(true)
       updateLoyaltyStats(parsed.email)
     }
-  }, [])
+  }
 
   // Actualizar estadísticas de fidelidad
   const updateLoyaltyStats = (email) => {
@@ -51,10 +77,59 @@ export function CustomerAuthProvider({ children }) {
   }
 
   // Registro
-  const register = (userData) => {
-    const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
+  const register = async (userData) => {
+    // Verificar si email ya existe en Supabase
+    if (isSupabaseConfigured()) {
+      const { data: existing } = await supabase
+        .from('customers')
+        .select('email')
+        .eq('email', userData.email)
+        .maybeSingle()
+      
+      if (existing) {
+        return { success: false, error: 'Este correo ya está registrado' }
+      }
+      
+      // Crear usuario en auth de Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password
+      })
+      
+      if (authError) {
+        return { success: false, error: authError.message }
+      }
+      
+      // Crear perfil en tabla customers
+      const newUser = {
+        id: authData.user.id,
+        nombre: userData.nombre,
+        email: userData.email,
+        telefono: userData.telefono,
+        password: userData.password, // En producción usar hash
+        referralCode: `CODEOL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        createdAt: new Date().toISOString()
+      }
+      
+      const { error: profileError } = await supabase
+        .from('customers')
+        .insert(newUser)
+      
+      if (profileError) {
+        return { success: false, error: profileError.message }
+      }
+      
+      // Iniciar sesión automáticamente
+      const { password, ...customerData } = newUser
+      setCustomer(customerData)
+      setIsLoggedIn(true)
+      localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+      
+      return { success: true }
+    }
     
-    // Verificar si email ya existe
+    // Fallback: localStorage
+    const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
     if (existingUsers.find(u => u.email === userData.email)) {
       return { success: false, error: 'Este correo ya está registrado' }
     }
@@ -69,7 +144,6 @@ export function CustomerAuthProvider({ children }) {
     existingUsers.push(newUser)
     localStorage.setItem('codeol-customers', JSON.stringify(existingUsers))
     
-    // Iniciar sesión automáticamente
     const { password, ...customerData } = newUser
     setCustomer(customerData)
     setIsLoggedIn(true)
@@ -79,7 +153,35 @@ export function CustomerAuthProvider({ children }) {
   }
 
   // Login
-  const login = (email, password) => {
+  const login = async (email, password) => {
+    // Intentar login con Supabase
+    if (isSupabaseConfigured()) {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      
+      if (authError) {
+        return { success: false, error: 'Correo o contraseña incorrectos' }
+      }
+      
+      const { data: profile } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single()
+      
+      if (profile) {
+        const { password: _, ...customerData } = profile
+        setCustomer(customerData)
+        setIsLoggedIn(true)
+        localStorage.setItem('codeol-customer', JSON.stringify(customerData))
+        updateLoyaltyStats(email)
+        return { success: true }
+      }
+    }
+    
+    // Fallback: localStorage
     const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
     const user = existingUsers.find(u => u.email === email && u.password === password)
     
@@ -97,7 +199,10 @@ export function CustomerAuthProvider({ children }) {
   }
 
   // Logout
-  const logout = () => {
+  const logout = async () => {
+    if (isSupabaseConfigured()) {
+      await supabase.auth.signOut()
+    }
     setCustomer(null)
     setIsLoggedIn(false)
     setLoyaltyLevel(LOYALTY_LEVELS.BRONZE)
@@ -107,14 +212,27 @@ export function CustomerAuthProvider({ children }) {
   }
 
   // Actualizar perfil
-  const updateProfile = (updates) => {
+  const updateProfile = async (updates) => {
+    if (isSupabaseConfigured() && customer?.id) {
+      const { error } = await supabase
+        .from('customers')
+        .update(updates)
+        .eq('id', customer.id)
+      
+      if (error) {
+        console.error('Error updating profile:', error)
+        return
+      }
+    }
+    
+    // Actualizar también en localStorage
     const existingUsers = JSON.parse(localStorage.getItem('codeol-customers') || '[]')
     const updatedUsers = existingUsers.map(u => 
       u.id === customer.id ? { ...u, ...updates } : u
     )
     localStorage.setItem('codeol-customers', JSON.stringify(updatedUsers))
     
-    const { password, ...customerData } = updatedUsers.find(u => u.id === customer.id)
+    const { password, ...customerData } = { ...customer, ...updates }
     setCustomer(customerData)
     localStorage.setItem('codeol-customer', JSON.stringify(customerData))
   }
