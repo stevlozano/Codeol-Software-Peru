@@ -14,7 +14,9 @@ import {
   CheckCircle,
   Loader2,
   Lock,
-  CreditCard
+  CreditCard,
+  FileText,
+  Clock
 } from 'lucide-react'
 
 const paymentMethods = [
@@ -142,23 +144,35 @@ export default function CheckoutPage() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-20 h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6"
             >
-              <CheckCircle size={40} className="text-green-500" />
+              <Clock size={40} className="text-yellow-500" />
             </motion.div>
-            <h1 className="text-2xl font-bold mb-2">¡Orden recibida!</h1>
+            <h1 className="text-2xl font-bold mb-2">¡Pedido enviado!</h1>
             <p className="text-pure-gray-400 mb-2">
-              Hemos recibido tu pedido. Te contactaremos en menos de 24 horas para confirmar el pago y los detalles del proyecto.
+              Tu pedido está <strong className="text-yellow-400">pendiente de aprobación</strong>. El administrador revisará tu pago y te notificará cuando sea aprobado.
             </p>
-            <p className="text-sm text-pure-gray-500 mb-6">
-              Se envió un resumen a {formData.email}
+            <p className="text-sm text-pure-gray-500 mb-2">
+              Te contactaremos en menos de 24 horas al: {formData.telefono}
             </p>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-pure-white text-pure-black rounded-full font-medium hover:bg-pure-gray-200 transition-colors"
-            >
-              Volver al inicio
-            </Link>
+            <p className="text-xs text-pure-gray-600 mb-6">
+              También se envió un resumen a: {formData.email}
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/order-status"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500/20 text-emerald-400 rounded-full font-medium hover:bg-emerald-500/30 transition-colors"
+              >
+                <FileText size={18} />
+                Ver estado de mi pedido
+              </Link>
+              <Link
+                to="/"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-pure-gray-800 text-pure-white rounded-full font-medium hover:bg-pure-gray-700 transition-colors"
+              >
+                Volver al inicio
+              </Link>
+            </div>
           </div>
         </main>
         <Footer />
