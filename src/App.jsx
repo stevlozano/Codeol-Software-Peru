@@ -18,8 +18,6 @@ import IndustriesPage from './pages/IndustriesPage'
 import PricingPage from './pages/PricingPage'
 import ContactPage from './pages/ContactPage'
 import CheckoutPage from './pages/CheckoutPage'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminLogin from './pages/AdminLogin'
 import OrderStatus from './pages/OrderStatus'
 import { CartProvider } from './context/CartContext'
 import { CustomerAuthProvider } from './context/CustomerAuthContext'
@@ -59,8 +57,6 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/order-status" element={<OrderStatus />} />
             <Route path="/mi-cuenta" element={<CustomerDashboard />} />
           <Route path="/login" element={<CustomerLogin />} />

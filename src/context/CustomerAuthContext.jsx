@@ -19,10 +19,6 @@ export function CustomerAuthProvider({ children }) {
 
   // Cargar sesión al iniciar - desde Supabase o localStorage
   useEffect(() => {
-    // Skip loading if on admin pages to prevent 406 errors
-    if (window.location.pathname.startsWith('/admin')) {
-      return
-    }
     loadSession()
   }, [])
 
@@ -31,19 +27,6 @@ export function CustomerAuthProvider({ children }) {
     if (isSupabaseConfigured()) {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
-        // First check if user is an admin to avoid 406 error
-        const { data: adminCheck } = await supabase
-          .from('admins')
-          .select('id')
-          .eq('id', session.user.id)
-          .maybeSingle()
-        
-        // If user is admin, don't try to load as customer
-        if (adminCheck) {
-          return
-        }
-        
-        // Try to load as customer
         const { data: profile, error } = await supabase
           .from('customers')
           .select('*')
