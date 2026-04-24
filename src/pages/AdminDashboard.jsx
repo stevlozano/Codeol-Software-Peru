@@ -266,6 +266,12 @@ export default function AdminDashboard() {
     if (auth === 'true') {
       setIsAuthenticated(true)
     }
+    
+    // Cargar estado de notificaciones desde localStorage
+    const savedNotifications = localStorage.getItem('codeol-notifications-enabled')
+    if (savedNotifications === 'true') {
+      setNotificationsEnabled(true)
+    }
   }, [])
 
   // Cargar órdenes y verificar nuevas
@@ -301,12 +307,21 @@ export default function AdminDashboard() {
     return () => clearInterval(interval)
   }, [isAuthenticated, notificationsEnabled])
 
-  // Solicitar permiso de notificaciones
-  const enableNotifications = async () => {
-    const granted = await requestNotificationPermission()
-    setNotificationsEnabled(granted)
-    if (granted) {
-      alert('Notificaciones activadas. Recibirás alertas cuando lleguen nuevos pedidos.')
+  // Toggle notificaciones (activar/desactivar)
+  const toggleNotifications = async () => {
+    if (notificationsEnabled) {
+      // Desactivar
+      setNotificationsEnabled(false)
+      localStorage.setItem('codeol-notifications-enabled', 'false')
+      alert('Notificaciones desactivadas.')
+    } else {
+      // Activar
+      const granted = await requestNotificationPermission()
+      setNotificationsEnabled(granted)
+      localStorage.setItem('codeol-notifications-enabled', granted ? 'true' : 'false')
+      if (granted) {
+        alert('Notificaciones activadas. Recibirás alertas cuando lleguen nuevos pedidos.')
+      }
     }
   }
 
@@ -553,21 +568,17 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {!notificationsEnabled && (
-                <button
-                  onClick={enableNotifications}
-                  className="hidden md:flex items-center gap-2 px-4 py-2 bg-pure-gray-800 rounded-full text-sm hover:bg-pure-gray-700 transition-colors"
-                >
-                  <Bell size={16} />
-                  Activar notificaciones
-                </button>
-              )}
-              {notificationsEnabled && (
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 rounded-full text-sm">
-                  <Bell size={16} />
-                  <span className="hidden lg:inline">Notificaciones activas</span>
-                </div>
-              )}
+              <button
+                onClick={toggleNotifications}
+                className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
+                  notificationsEnabled
+                    ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                    : 'bg-pure-gray-800 text-pure-gray-400 hover:bg-pure-gray-700'
+                }`}
+              >
+                <Bell size={16} />
+                {notificationsEnabled ? 'Desactivar notificaciones' : 'Activar notificaciones'}
+              </button>
               <button
                 onClick={handleLogout}
                 className="p-2 hover:bg-pure-gray-800 rounded-lg"
