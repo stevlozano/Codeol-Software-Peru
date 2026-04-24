@@ -37,11 +37,21 @@ export default function AdminLogin() {
   const checkAdminExists = async () => {
     if (!isSupabaseConfigured()) return
     
-    const { count } = await supabase
-      .from('admins')
-      .select('*', { count: 'exact', head: true })
-    
-    setHasAdmin(count > 0)
+    try {
+      const { count, error } = await supabase
+        .from('admins')
+        .select('*', { count: 'exact', head: true })
+      
+      if (error) {
+        // If 401 or any error, assume no admin exists
+        setHasAdmin(false)
+      } else {
+        setHasAdmin(count > 0)
+      }
+    } catch (err) {
+      // Assume no admin exists if there's any error
+      setHasAdmin(false)
+    }
   }
 
   const handleLogin = async (e) => {
