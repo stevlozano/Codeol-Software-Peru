@@ -122,7 +122,7 @@ export default function AdminLogin() {
     }
     
     try {
-      // Create auth user
+      // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registerData.email,
         password: registerData.password
@@ -133,7 +133,18 @@ export default function AdminLogin() {
         return
       }
       
-      // Create admin profile
+      // Step 2: Sign in to get active session (required for RLS policy)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: registerData.email,
+        password: registerData.password
+      })
+      
+      if (signInError) {
+        setError('Error al iniciar sesión: ' + signInError.message)
+        return
+      }
+      
+      // Step 3: Create admin profile (now with active session)
       const { error: insertError } = await supabase
         .from('admins')
         .insert({

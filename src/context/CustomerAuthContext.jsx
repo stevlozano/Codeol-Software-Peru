@@ -117,7 +117,19 @@ export function CustomerAuthProvider({ children }) {
         
         console.log('Auth user created:', authData.user.id)
         
-        // Crear perfil en tabla customers
+        // Step 2: Sign in to get active session (required for RLS policy)
+        console.log('Signing in to get session...')
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: userData.email,
+          password: userData.password
+        })
+        
+        if (signInError) {
+          console.error('Sign in error:', signInError)
+          return { success: false, error: `Error al iniciar sesión: ${signInError.message}` }
+        }
+        
+        // Step 3: Crear perfil en tabla customers (now with active session)
         const newUser = {
           id: authData.user.id,
           nombre: userData.nombre,
