@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUpRight, ShoppingBag, User } from 'lucide-react'
+import { ArrowUpRight, ShoppingBag } from 'lucide-react'
 import ProjectModal from './ProjectModal'
 import { useCart } from '../context/CartContext'
 import { useCustomerAuth } from '../context/CustomerAuthContext'
@@ -119,21 +119,6 @@ export default function Navbar() {
               </span>
             )}
           </button>
-
-          {/* User Account Button */}
-          <Link
-            to={isLoggedIn ? "/mi-cuenta" : "/login"}
-            className={`hidden md:flex items-center gap-2 ml-2 px-3 py-2 text-xs tracking-[0.1em] uppercase rounded-full transition-colors duration-300 ${
-              isLoggedIn 
-                ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30' 
-                : 'bg-pure-gray-800 text-pure-white hover:bg-pure-gray-700'
-            }`}
-          >
-            <User size={14} />
-            {isLoggedIn && (
-              <span className="max-w-[80px] truncate">{customer?.nombre?.split(' ')[0]}</span>
-            )}
-          </Link>
 
           {/* CTA Button */}
           <button
