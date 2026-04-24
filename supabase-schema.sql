@@ -146,12 +146,15 @@ CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
 
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 
--- Políticas para admins
-CREATE POLICY "Allow authenticated users to view admins" ON admins
-  FOR SELECT USING (auth.role() = 'authenticated');
+-- Políticas para admins - más permisivas para permitir registro inicial
+CREATE POLICY "Allow anyone to check if admins exist" ON admins
+  FOR SELECT USING (true);
 
-CREATE POLICY "Allow insert during admin signup" ON admins
+CREATE POLICY "Allow authenticated users to insert admins" ON admins
   FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Admins can view all admins" ON admins
+  FOR SELECT USING (auth.uid() = id);
 
 CREATE POLICY "Admins can update own profile" ON admins
   FOR UPDATE USING (auth.uid() = id);
