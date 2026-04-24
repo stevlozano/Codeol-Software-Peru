@@ -140,33 +140,33 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-pure-black flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl">
-        <div className="grid md:grid-cols-2 gap-0 bg-pure-gray-900/50 backdrop-blur-sm rounded-2xl border border-pure-gray-800 overflow-hidden">
+    <div className="min-h-screen bg-pure-black flex items-center justify-center">
+      <div className="w-full h-screen">
+        <div className="grid md:grid-cols-2 h-full">
           {/* Left Column - Logo */}
-          <div className="bg-pure-gray-800/50 p-12 flex flex-col items-center justify-center border-r border-pure-gray-800">
-            <div className="w-32 h-32 mb-6">
+          <div className="bg-pure-gray-900/50 backdrop-blur-sm flex flex-col items-center justify-center border-r border-pure-gray-800 p-8">
+            <div className="w-48 h-48 mb-8">
               <img 
                 src="/images/logooriginal.png" 
                 alt="CODEOL Logo" 
                 className="w-full h-full object-contain"
               />
             </div>
-            <h1 className="text-4xl font-bold text-pure-white mb-2 tracking-tight text-center">
+            <h1 className="text-5xl font-bold text-pure-white mb-3 tracking-tight text-center">
               CODEOL
             </h1>
-            <p className="text-pure-gray-400 text-sm tracking-wide text-center">
+            <p className="text-pure-gray-400 text-base tracking-wide text-center">
               Software Perú
             </p>
           </div>
 
           {/* Right Column - Form */}
-          <div className="p-12">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-pure-white mb-2 tracking-tight">
+          <div className="flex flex-col justify-center p-8 md:p-16">
+            <div className="mb-12">
+              <h2 className="text-4xl font-bold text-pure-white mb-3 tracking-tight">
                 {showRegister ? 'Registrar Admin' : 'Admin Panel'}
               </h2>
-              <p className="text-pure-gray-400 text-sm tracking-wide">
+              <p className="text-pure-gray-400 text-base tracking-wide">
                 {showRegister ? 'Crea el primer administrador' : 'Acceso al panel de control'}
               </p>
             </div>
@@ -184,13 +184,13 @@ export default function AdminLogin() {
             )}
 
             {showRegister ? (
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form onSubmit={handleRegister} className="space-y-5 max-w-md">
                 <div>
                   <input
                     type="text"
                     value={registerData.nombre}
                     onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
-                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    className="w-full px-5 py-4 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-base"
                     placeholder="Nombre"
                     required
                   />
@@ -200,7 +200,7 @@ export default function AdminLogin() {
                     type="email"
                     value={registerData.email}
                     onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    className="w-full px-5 py-4 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-base"
                     placeholder="Email"
                     required
                   />
@@ -210,7 +210,7 @@ export default function AdminLogin() {
                     type="password"
                     value={registerData.password}
                     onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    className="w-full px-5 py-4 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-base"
                     placeholder="Contraseña"
                     required
                   />
@@ -218,26 +218,26 @@ export default function AdminLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50 mt-6"
+                  className="w-full py-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-base tracking-wide disabled:opacity-50 mt-8"
                 >
                   {loading ? 'Registrando...' : 'Registrar'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowRegister(false)}
-                  className="w-full py-3 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
+                  className="w-full py-4 text-pure-gray-400 hover:text-pure-white transition-colors text-base"
                 >
                   Cancelar
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-5 max-w-md">
                 <div>
                   <input
                     type="email"
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    className="w-full px-5 py-4 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-base"
                     placeholder="Email"
                     required
                   />
@@ -247,7 +247,7 @@ export default function AdminLogin() {
                     type="password"
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-sm"
+                    className="w-full px-5 py-4 bg-pure-gray-800/50 border border-pure-gray-700 rounded-lg text-pure-white placeholder-pure-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all text-base"
                     placeholder="Contraseña"
                     required
                   />
@@ -255,7 +255,7 @@ export default function AdminLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-sm tracking-wide disabled:opacity-50 mt-6"
+                  className="w-full py-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium rounded-lg transition-all text-base tracking-wide disabled:opacity-50 mt-8"
                 >
                   {loading ? 'Iniciando...' : 'Entrar'}
                 </button>
@@ -263,7 +263,7 @@ export default function AdminLogin() {
                   <button
                     type="button"
                     onClick={() => setShowRegister(true)}
-                    className="w-full py-3 text-pure-gray-400 hover:text-pure-white transition-colors text-sm"
+                    className="w-full py-4 text-pure-gray-400 hover:text-pure-white transition-colors text-base"
                   >
                     Registrar primer admin
                   </button>
